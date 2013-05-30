@@ -60,7 +60,7 @@ class nmea_main:
         QObject.connect(self.dlg.ui.addBut,SIGNAL("clicked()"), self.addLayer)
         QObject.connect(self.dlg.ui.settBut,SIGNAL("clicked()"), self.sett)
         
-        QObject.connect(self.dlg2.ui.saveCheck,SIGNAL("stateChanged(int)"), self.changeCombo)
+
         QObject.connect(self.dlg2.ui.addBut,SIGNAL("clicked()"), self.addSave)
         QObject.connect(self.dlg2.ui.mat1Combo,SIGNAL("currentIndexChanged(int)"), self.chmat1)
         QObject.connect(self.dlg2.ui.mat2Combo,SIGNAL("currentIndexChanged(int)"), self.chmat2)
@@ -114,124 +114,101 @@ class nmea_main:
       
         
         
-                
-    def ggaOnly(self):
-        lines = unicode(self.dlg2.ui.nmeaBrowser.toPlainText()).split('\n')
-        nmeadocc=QTextDocument()
-        nmeacurr=QTextCursor(nmeadocc)
-        self.dlg2.ui.nmeaBrowser.clear()
         
-        #formm=QTextCharFormat()
-        #brus=QBrush()
-        #brus.setColor(Qt.red)
-        #formm.setBackground(brus)
-        #formm.setForeground(brus)
-        #formm.setFontItalic(True)
-        for linee in lines:
-            #QMessageBox.information( self.iface.mainWindow(),"Info", linee )
-            if linee.startswith('$GPGGA'):
-                nmeacurr.insertText(linee)
-   
-        self.dlg2.ui.nmeaBrowser.setDocument(nmeadocc)     
       
     def openNmea(self):
         self.nmeadoc=QTextDocument()
         self.nmeacur=QTextCursor(self.nmeadoc)
-        try:
-            self.nmeafile=open(self.dlg.ui.lineEdit.text()) 
-        except:
-            QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file")
-           
-        start=time.time()  
-        '''
-        for line in self.nmeafile:
-            self.nmeacur.insertText(line)
-        '''
-         
-        
+        #try:
+        self.nmeafile=open(self.dlg.ui.lineEdit.text()) 
+        start=time.time() 
         self.nmeaDict(self.nmeafile,1)
         self.dlg2.ui.nmeaBrowser.setDocument(self.nmeadoc)
         self.plotmat()
         end=time.time()
-        QMessageBox.information(self.iface.mainWindow(),"info",str(end-start))
-        self.dlg2.show()      
-      
+        QMessageBox.information(self.iface.mainWindow(),"info",str(end-start))    
+        self.dlg2.show() 
+            
+        #except:
+            #QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file")
+
         
     def addLayer(self):
-        try:
+        #try:
             nmeafile=open(self.dlg.ui.lineEdit.text()) 
-        except:
-            QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file")
-    
-        
-        self.nmeaDict(nmeafile,0)
-        self.addSave()
-        
+            self.nmeaDict(nmeafile,0)
+            self.addSave()
+        #except:
+            #QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file")
+
+    def nmeaDict(self,nmeafile,insert):
+
+        self.nmeadict={}
+        nmeafile.seek(0)
+     
+        self.dlg.close()  
+        for line in nmeafile:
+             if insert==1: 
+                 self.nmeacur.insertText(line)
+             linee=line.split(',')
+             if line[3:6]=='GGA' or line[3:6]=='RMC':
+                 self.nmeadict[linee[1]]=['',0,0,0,0,0,0,0,0,0,0,0,0]
+             if line[3:6]=='GLL':
+                 self.nmeadict[linee[5]]=['',0,0,0,0,0,0,0,0,0,0,0,0]
+        nmeafile.seek(0)
+        for line in nmeafile:
+            if line.startswith('$'):
+                try:  
+                    parser={'GGA':self.par_gga,'RMC':self.par_rmc,'GLL':self.par_gll}[line[3:6]]
+                    #QMessageBox.information(self.iface.mainWindow(), 'info', line[3:6])
+                    parser(line)
+                except:
+                    #QMessageBox.critical(self.iface.mainWindow(), 'info', line)
+                    continue
+        nmeafile.close() 
+               
+               
+        self.lat=[]       
+        self.lon=[]       
+        self.numSV=[]
+        self.hdop=[]  
+        self.vdop=[] 
+        self.pdop=[] 
+        self.msl=[] 
+        self.dates=[] 
+        self.geoid=[]    
+        self.speed=[]  
+        self.fixstatus=[]    
+        self.datastatus=[]
+        self.utc=[]
+        for keyy in self.nmeadict.keys():
+            self.utc.append(self.nmeadict[keyy][0])
+            self.dates.append(datetime.datetime.strptime(self.nmeadict[keyy][0],'%H:%M:%S'))
+            self.numSV.append(float(self.nmeadict[keyy][3]))
+            try:    self.hdop.append(float(self.nmeadict[keyy][4]))
+            except:  self.hdop.append(0)
+            
+            self.lon.append(self.nmeadict[keyy][2])
+            self.lat.append(self.nmeadict[keyy][1])
+            self.vdop.append(float(self.nmeadict[keyy][5]))
+            self.pdop.append(float(self.nmeadict[keyy][6]))
+            try:    self.msl.append(float(self.nmeadict[keyy][7]))
+            except: self.msl.append(0)
+            try:    self.geoid.append(float(self.nmeadict[keyy][8]))
+            except: self.geoid.append(0)
+            self.speed.append(float(self.nmeadict[keyy][9]))
+            self.fixstatus.append(int(self.nmeadict[keyy][11]))
+            datastatus=0
+            if self.nmeadict[keyy][12]=='A':    datastatus=1
+            self.datastatus.append(datastatus)   
+   
        
         
-    '''     
-    def addLayer2(self):
-
-        self.epsg4326= QgsCoordinateReferenceSystem()
-        self.epsg4326.createFromString("epsg:4326")
-        nmealayer = QgsVectorLayer("Point?crs=epsg:4326", "nmealeayer", "memory")
-        nmealayer.startEditing()
-   
-        pr = nmealayer.dataProvider()
-        att=[]
-        if self.dlg3.ui.utcCheck.isChecked():
-               pr.addAttributes( [ QgsField("utc", QVariant.String)] )
-               att.append(self.dates)
-        if self.dlg3.ui.svCheck.isChecked():
-               pr.addAttributes( [ QgsField("numSV", QVariant.Double)] )
-               att.append(self.numSV)
-        if self.dlg3.ui.hdopCheck.isChecked():
-               pr.addAttributes( [ QgsField("hdop", QVariant.Double)] )
-               att.append(self.hdop)
-        if self.dlg3.ui.vdopCheck.isChecked():
-               pr.addAttributes( [ QgsField("vdop", QVariant.Double)] )
-               att.append(self.vdop)
-        if self.dlg3.ui.pdopCheck.isChecked():
-               pr.addAttributes( [ QgsField("pdop", QVariant.Double)] )
-               att.append(self.pdop)
-        if self.dlg3.ui.mslCheck.isChecked():
-               pr.addAttributes( [ QgsField("msl", QVariant.Double)] )
-               att.append(self.msl)
-        
-        fett=[]
-        for a,lat in enumerate(self.lat):
-            fet = QgsFeature()         
-            fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(self.lon[a],lat)))
-            b=0
-            for aa in att:
-                fet.addAttribute(b,QVariant(aa[a]))
-                b+=1
-            fett.append(fet)
-        
-        #latlonatt=zip(att)
-        #fet=[self.addFeature(l) for l in latlonatt ]
-
-        pr.addFeatures(fett)
-        
-
-        nmealayer.commitChanges()
-        nmealayer.updateExtents()
-        QgsMapLayerRegistry.instance().addMapLayer(nmealayer)
- 
-        
-        self.dlg2.ui.matplot1.canvas.ax1.clear()
-        self.dlg2.ui.matplot1.canvas.ax2.clear()
-        self.dlg2.ui.nmeaBrowser.clear()
-        self.dlg2.close()
-       '''
+    
     def addSave(self):
         fields = {}
         self.epsg4326= QgsCoordinateReferenceSystem()
         self.epsg4326.createFromString("epsg:4326")
-         
-            
-        
-        
         nmealayer = QgsVectorLayer("Point?crs=epsg:4326", "nmealeayer", "memory")
         nmealayer.startEditing()
    
@@ -297,85 +274,8 @@ class nmea_main:
         self.dlg2.ui.matplot1.canvas.ax2.clear()
         self.dlg2.ui.nmeaBrowser.clear()
         self.dlg2.close()   
-       
-       
-       
-       
-       
-    ''' 
-    def addFeature(self,latlonatt):   
-        fet = QgsFeature()         
-        fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(latlonatt[0],latlonatt[1])))
-        a=2
-        for a in range(len(latlonatt)-2):
-            fet.addAttribute(a-2,QVariant(latlonatt[a]))
-        #fet.addAttribute(1,QVariant(latlonatt[1]))
-        return fet
-     '''
-     
-     
-    def nmeaDict(self,nmeafile,insert):
 
-        self.nmeadict={}
-        nmeafile.seek(0)
-     
-        self.dlg.close()  
-        for line in nmeafile:
-             if insert==1: 
-                 self.nmeacur.insertText(line)
-             linee=line.split(',')
-             if line[3:6]=='GGA' or line[3:6]=='RMC':
-                 self.nmeadict[linee[1]]=[0,0,0,0,0,0,0,0,0,0,0,0,0]
-             if line[3:6]=='GLL':
-                 self.nmeadict[linee[5]]=[0,0,0,0,0,0,0,0,0,0,0,0,0]
-        nmeafile.seek(0)
-        for line in nmeafile:
-            if line.startswith('$'):
-                try:  
-                    parser={'GGA':self.par_gga,'RMC':self.par_rmc,'GLL':self.par_gll}[line[3:6]]
-                    parser(line)
-                except:
-                    continue
-        nmeafile.close() 
-               
-               
-        self.lat=[]       
-        self.lon=[]       
-        self.numSV=[]
-        self.hdop=[]  
-        self.vdop=[] 
-        self.pdop=[] 
-        self.msl=[] 
-        self.dates=[] 
-        self.geoid=[]    
-        self.speed=[]  
-        self.fixstatus=[]    
-        self.datastatus=[]
-        self.utc=[]
-        for keyy in self.nmeadict.keys():
-            self.utc.append(self.nmeadict[keyy][0])
-            self.dates.append(datetime.datetime.strptime(self.nmeadict[keyy][0],'%H:%M:%S'))
-            self.numSV.append(float(self.nmeadict[keyy][3]))
-            try:    self.hdop.append(float(self.nmeadict[keyy][4]))
-            except:  self.hdop.append(0)
-            
-            self.lon.append(float(self.nmeadict[keyy][2]))
-            self.lat.append(float(self.nmeadict[keyy][1]))
-            self.vdop.append(float(self.nmeadict[keyy][5]))
-            self.pdop.append(float(self.nmeadict[keyy][6]))
-            self.msl.append(float(self.nmeadict[keyy][7]))
-            self.geoid.append(float(self.nmeadict[keyy][8]))
-            self.speed.append(float(self.nmeadict[keyy][9]))
-            self.fixstatus.append(int(self.nmeadict[keyy][11]))
-            datastatus=0
-            if self.nmeadict[keyy][12]=='A':    datastatus=1
-            self.datastatus.append(datastatus)
-            
-                 
-   
-    
 
-        
         
         
     def plotmat(self):
@@ -417,9 +317,9 @@ class nmea_main:
         data=line.split(',')
         key=data[1]
         utc=data[1][:2]+':'+data[1][2:4]+':'+data[1][4:6]
-        latt=str(float(data[2][:2])+float(data[2][2:])/60)
+        latt=float(data[2][:2])+float(data[2][2:])/60
         ind=string.find(data[4],".")
-        lonn=str(float(data[4][:(ind-2)])+float(data[4][(ind-2):])/60)
+        lonn=float(data[4][:(ind-2)])+float(data[4][(ind-2):])/60
         numsv=data[7]
         hdop=data[8]
         msl=data[9]
@@ -439,9 +339,9 @@ class nmea_main:
         data=line.split(',')
         key=data[1]
         utc=data[1][:2]+':'+data[1][2:4]+':'+data[1][4:6]
-        latt=str(float(data[3][:2])+float(data[3][2:])/60)
-        ind=string.find(data[4],".")
-        lonn=str(float(data[4][:(ind-2)])+float(data[4][(ind-2):])/60)
+        latt=float(data[3][:2])+float(data[3][2:])/60
+        ind=string.find(data[5],".")
+        lonn=float(data[5][:(ind-2)])+float(data[5][(ind-2):])/60
         speed=data[7]
         datastatus=data[2]
         self.nmeadict[key][0]=utc
@@ -455,13 +355,30 @@ class nmea_main:
         data=line.split(',')
         key=data[5]
         utc=data[5][:2]+':'+data[5][2:4]+':'+data[5][4:6]
-        latt=str(float(data[1][:2])+float(data[1][2:])/60)
-        ind=string.find(data[4],".")
-        lonn=str(float(data[4][:(ind-2)])+float(data[4][(ind-2):])/60)
+        latt=float(data[1][:2])+float(data[1][2:])/60
+        ind=string.find(data[3],".")
+        lonn=float(data[3][:(ind-2)])+float(data[3][(ind-2):])/60
         datastatus=data[6]
         self.nmeadict[key][0]=utc
         self.nmeadict[key][1]=latt
         self.nmeadict[key][2]=lonn
         self.nmeadict[key][12]=datastatus
         
+    def ggaOnly(self):
+        lines = unicode(self.dlg2.ui.nmeaBrowser.toPlainText()).split('\n')
+        nmeadocc=QTextDocument()
+        nmeacurr=QTextCursor(nmeadocc)
+        self.dlg2.ui.nmeaBrowser.clear()
         
+        #formm=QTextCharFormat()
+        #brus=QBrush()
+        #brus.setColor(Qt.red)
+        #formm.setBackground(brus)
+        #formm.setForeground(brus)
+        #formm.setFontItalic(True)
+        for linee in lines:
+            #QMessageBox.information( self.iface.mainWindow(),"Info", linee )
+            if linee.startswith('$GPGGA'):
+                nmeacurr.insertText(linee)
+   
+        self.dlg2.ui.nmeaBrowser.setDocument(nmeadocc)      
