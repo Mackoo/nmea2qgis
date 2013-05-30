@@ -157,18 +157,40 @@ class nmea_main:
         nmealayer.startEditing()
    
         pr = nmealayer.dataProvider()
-        if self.dlg2.ui.utcCheck.isChecked():   pr.addAttributes( [ QgsField("utc", QVariant.String)] )
-        if self.dlg2.ui.svCheck.isChecked():   pr.addAttributes( [ QgsField("numSV", QVariant.Double)] )
-        if self.dlg2.ui.hdopCheck.isChecked():   pr.addAttributes( [ QgsField("hdop", QVariant.Double)] )
-        if self.dlg2.ui.vdopCheck.isChecked():   pr.addAttributes( [ QgsField("vdop", QVariant.Double)] )
-        if self.dlg2.ui.pdopCheck.isChecked():   pr.addAttributes( [ QgsField("pdop", QVariant.Double)] )
-        if self.dlg2.ui.mslCheck.isChecked():   pr.addAttributes( [ QgsField("msl", QVariant.Double)] )
+        att=[]
+        if self.dlg2.ui.utcCheck.isChecked():
+               pr.addAttributes( [ QgsField("utc", QVariant.String)] )
+               att.append(self.dates)
+        if self.dlg2.ui.svCheck.isChecked():
+               pr.addAttributes( [ QgsField("numSV", QVariant.Double)] )
+               att.append(self.numSV)
+        if self.dlg2.ui.hdopCheck.isChecked():
+               pr.addAttributes( [ QgsField("hdop", QVariant.Double)] )
+               att.append(self.hdop)
+        if self.dlg2.ui.vdopCheck.isChecked():
+               pr.addAttributes( [ QgsField("vdop", QVariant.Double)] )
+               att.append(self.vdop)
+        if self.dlg2.ui.pdopCheck.isChecked():
+               pr.addAttributes( [ QgsField("pdop", QVariant.Double)] )
+               att.append(self.pdop)
+        if self.dlg2.ui.mslCheck.isChecked():
+               pr.addAttributes( [ QgsField("msl", QVariant.Double)] )
+               att.append(self.msl)
         
+        fett=[]
+        for a in range(len(self.lat)):
+            fet = QgsFeature()         
+            fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(self.lon[a],self.lat[a])))
+            b=0
+            for aa in att:
+                fet.addAttribute(b,QVariant(aa[a]))
+                b+=1
+            fett.append(fet)
         
-        latlonatt=zip(self.lon,self.lat,self.dates,self.msl)
-        fet=[self.addFeature(l) for l in latlonatt ]
+        #latlonatt=zip(att)
+        #fet=[self.addFeature(l) for l in latlonatt ]
 
-        pr.addFeatures(fet)
+        pr.addFeatures(fett)
         
 
         if self.dlg2.ui.saveCheck.isChecked():  del writer
@@ -187,8 +209,10 @@ class nmea_main:
     def addFeature(self,latlonatt):   
         fet = QgsFeature()         
         fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(latlonatt[0],latlonatt[1])))
-        fet.addAttribute(0,QVariant(latlonatt[0]))
-        fet.addAttribute(1,QVariant(latlonatt[1]))
+        a=2
+        for a in range(len(latlonatt)-2):
+            fet.addAttribute(a-2,QVariant(latlonatt[a]))
+        #fet.addAttribute(1,QVariant(latlonatt[1]))
         return fet
      
      
