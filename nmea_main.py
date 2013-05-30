@@ -26,8 +26,7 @@ from qgis.core import *
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
-from nmea_maindialog import nmea_mainDialog
-from nmea_dialog import nmea_Dialog
+from nmea_dialog import nmea_Dialog,nmea_mainDialog,nmea_settDialog
 import datetime, time,os,string
 
 class nmea_main:
@@ -53,15 +52,16 @@ class nmea_main:
         # Create the dialog (after translation) and keep reference
         self.dlg = nmea_mainDialog()
         self.dlg2=nmea_Dialog()
+        self.dlg3=nmea_settDialog()
         
         QObject.connect(self.dlg.ui.pushButton,SIGNAL("clicked()"), self.dialog)
         QObject.connect(self.dlg.ui.ButOpenNmea,SIGNAL("clicked()"), self.openNmea)
         QObject.connect(self.dlg.ui.ButExit,SIGNAL("clicked()"), self.exit)
         QObject.connect(self.dlg.ui.addBut,SIGNAL("clicked()"), self.addLayer)
-
+        QObject.connect(self.dlg.ui.settBut,SIGNAL("clicked()"), self.sett)
         
         QObject.connect(self.dlg2.ui.saveCheck,SIGNAL("stateChanged(int)"), self.changeCombo)
-        QObject.connect(self.dlg2.ui.addBut,SIGNAL("clicked()"), self.addLayer2)
+        QObject.connect(self.dlg2.ui.addBut,SIGNAL("clicked()"), self.addSave)
         QObject.connect(self.dlg2.ui.mat1Combo,SIGNAL("currentIndexChanged(int)"), self.chmat1)
         QObject.connect(self.dlg2.ui.mat2Combo,SIGNAL("currentIndexChanged(int)"), self.chmat2)
         
@@ -82,8 +82,6 @@ class nmea_main:
         self.fd.setDirectory("C:\Users\Maciek\Documents\GIG\magisterka\STD Oszczak\praca_mag")
         
     def unload(self):
-        #QMessageBox.information(self.iface.mainWindow(),"Info","unload")
-        # Remove the plugin menu item and icon
         self.iface.removePluginMenu(u"&nmea2qgis", self.action)
         self.iface.removeToolBarIcon(self.action)
 
@@ -92,9 +90,7 @@ class nmea_main:
         # show the dialog
         self.dlg.show()
         result=self.dlg.exec_()
-        
-   
-        
+         
     def dialog(self):
         self.filename = self.fd.getOpenFileName()
         from os.path import isfile
@@ -113,6 +109,12 @@ class nmea_main:
         else:   
             self.dlg2.ui.formatCombo.setEnabled(False) 
             
+    def sett(self):
+        self.dlg3.show()
+      
+        
+        
+                
     def ggaOnly(self):
         lines = unicode(self.dlg2.ui.nmeaBrowser.toPlainText()).split('\n')
         nmeadocc=QTextDocument()
@@ -131,7 +133,29 @@ class nmea_main:
                 nmeacurr.insertText(linee)
    
         self.dlg2.ui.nmeaBrowser.setDocument(nmeadocc)     
+      
+    def openNmea(self):
+        self.nmeadoc=QTextDocument()
+        self.nmeacur=QTextCursor(self.nmeadoc)
+        try:
+            self.nmeafile=open(self.dlg.ui.lineEdit.text()) 
+        except:
+            QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file")
+           
+        start=time.time()  
+        '''
+        for line in self.nmeafile:
+            self.nmeacur.insertText(line)
+        '''
+         
         
+        self.nmeaDict(self.nmeafile,1)
+        self.dlg2.ui.nmeaBrowser.setDocument(self.nmeadoc)
+        self.plotmat()
+        end=time.time()
+        QMessageBox.information(self.iface.mainWindow(),"info",str(end-start))
+        self.dlg2.show()      
+      
         
     def addLayer(self):
         try:
@@ -139,48 +163,45 @@ class nmea_main:
         except:
             QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file")
     
+        
         self.nmeaDict(nmeafile,0)
-        self.addLayer2()
-       
+        self.addSave()
+        
        
         
-        
+    '''     
     def addLayer2(self):
-        fields = { 0 : QgsField("utc", QVariant.String), 1 : QgsField("height", QVariant.Double) }
+
         self.epsg4326= QgsCoordinateReferenceSystem()
         self.epsg4326.createFromString("epsg:4326")
-        if self.dlg2.ui.saveCheck.isChecked():  
-            self.filename = self.fd.getSaveFileName()
-            writer = QgsVectorFileWriter(self.filename, "CP1250", fields, QGis.WKBPoint, self.epsg4326, self.dlg2.ui.formatCombo.currentText())
-        
         nmealayer = QgsVectorLayer("Point?crs=epsg:4326", "nmealeayer", "memory")
         nmealayer.startEditing()
    
         pr = nmealayer.dataProvider()
         att=[]
-        if self.dlg2.ui.utcCheck.isChecked():
+        if self.dlg3.ui.utcCheck.isChecked():
                pr.addAttributes( [ QgsField("utc", QVariant.String)] )
                att.append(self.dates)
-        if self.dlg2.ui.svCheck.isChecked():
+        if self.dlg3.ui.svCheck.isChecked():
                pr.addAttributes( [ QgsField("numSV", QVariant.Double)] )
                att.append(self.numSV)
-        if self.dlg2.ui.hdopCheck.isChecked():
+        if self.dlg3.ui.hdopCheck.isChecked():
                pr.addAttributes( [ QgsField("hdop", QVariant.Double)] )
                att.append(self.hdop)
-        if self.dlg2.ui.vdopCheck.isChecked():
+        if self.dlg3.ui.vdopCheck.isChecked():
                pr.addAttributes( [ QgsField("vdop", QVariant.Double)] )
                att.append(self.vdop)
-        if self.dlg2.ui.pdopCheck.isChecked():
+        if self.dlg3.ui.pdopCheck.isChecked():
                pr.addAttributes( [ QgsField("pdop", QVariant.Double)] )
                att.append(self.pdop)
-        if self.dlg2.ui.mslCheck.isChecked():
+        if self.dlg3.ui.mslCheck.isChecked():
                pr.addAttributes( [ QgsField("msl", QVariant.Double)] )
                att.append(self.msl)
         
         fett=[]
-        for a in range(len(self.lat)):
+        for a,lat in enumerate(self.lat):
             fet = QgsFeature()         
-            fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(self.lon[a],self.lat[a])))
+            fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(self.lon[a],lat)))
             b=0
             for aa in att:
                 fet.addAttribute(b,QVariant(aa[a]))
@@ -193,7 +214,6 @@ class nmea_main:
         pr.addFeatures(fett)
         
 
-        if self.dlg2.ui.saveCheck.isChecked():  del writer
         nmealayer.commitChanges()
         nmealayer.updateExtents()
         QgsMapLayerRegistry.instance().addMapLayer(nmealayer)
@@ -203,9 +223,86 @@ class nmea_main:
         self.dlg2.ui.matplot1.canvas.ax2.clear()
         self.dlg2.ui.nmeaBrowser.clear()
         self.dlg2.close()
+       '''
+    def addSave(self):
+        fields = {}
+        self.epsg4326= QgsCoordinateReferenceSystem()
+        self.epsg4326.createFromString("epsg:4326")
+         
+            
+        
+        
+        nmealayer = QgsVectorLayer("Point?crs=epsg:4326", "nmealeayer", "memory")
+        nmealayer.startEditing()
+   
+        pr = nmealayer.dataProvider()
+        att=[]
+        a=0
+        if self.dlg3.ui.utcCheck.isChecked():
+               pr.addAttributes( [ QgsField("utc", QVariant.String)] )
+               att.append(self.utc)
+               fields[a]=QgsField("utc", QVariant.String)
+               a+=1
+        if self.dlg3.ui.svCheck.isChecked():
+               pr.addAttributes( [ QgsField("numSV", QVariant.Double)] )
+               att.append(self.numSV)
+               fields[a]=QgsField("numSV", QVariant.Double)
+               a+=1
+        if self.dlg3.ui.hdopCheck.isChecked():
+               pr.addAttributes( [ QgsField("hdop", QVariant.Double)] )
+               att.append(self.hdop)
+               fields[a]=QgsField("hdop", QVariant.Double)
+               a+=1
+        if self.dlg3.ui.vdopCheck.isChecked():
+               pr.addAttributes( [ QgsField("vdop", QVariant.Double)] )
+               att.append(self.vdop)
+               fields[a]=QgsField("vdop", QVariant.Double)
+               a+=1
+        if self.dlg3.ui.pdopCheck.isChecked():
+               pr.addAttributes( [ QgsField("pdop", QVariant.Double)] )
+               att.append(self.pdop)
+               fields[a]=QgsField("pdop", QVariant.Double)
+               a+=1
+        if self.dlg3.ui.mslCheck.isChecked():
+               pr.addAttributes( [ QgsField("msl", QVariant.Double)] )
+               att.append(self.msl)
+               fields[a]=QgsField("msl", QVariant.Double)
+               a+=1
+               
+               
+        fett=[]
+        for a,lat in enumerate(self.lat):
+            fet = QgsFeature()         
+            fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(self.lon[a],lat)))
+            b=0
+            for aa in att:
+                fet.addAttribute(b,QVariant(aa[a]))
+                b+=1
+            fett.append(fet)
+            
+        if self.dlg3.ui.saveCheck.isChecked(): 
+            self.filename = self.fd.getSaveFileName()
+            writer = QgsVectorFileWriter(self.filename, "CP1250", fields, QGis.WKBPoint, self.epsg4326, self.dlg2.ui.formatCombo.currentText())
+            for fet in fett:
+                writer.addFeature(fet)
+            del writer
+        pr.addFeatures(fett)
+        
+        nmealayer.commitChanges()
+        nmealayer.updateExtents()
+        QgsMapLayerRegistry.instance().addMapLayer(nmealayer)
+ 
+        
+        self.dlg2.ui.matplot1.canvas.ax1.clear()
+        self.dlg2.ui.matplot1.canvas.ax2.clear()
+        self.dlg2.ui.nmeaBrowser.clear()
+        self.dlg2.close()   
        
        
        
+       
+       
+    ''' 
     def addFeature(self,latlonatt):   
         fet = QgsFeature()         
         fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(latlonatt[0],latlonatt[1])))
@@ -214,7 +311,7 @@ class nmea_main:
             fet.addAttribute(a-2,QVariant(latlonatt[a]))
         #fet.addAttribute(1,QVariant(latlonatt[1]))
         return fet
-     
+     '''
      
      
     def nmeaDict(self,nmeafile,insert):
@@ -254,7 +351,9 @@ class nmea_main:
         self.speed=[]  
         self.fixstatus=[]    
         self.datastatus=[]
+        self.utc=[]
         for keyy in self.nmeadict.keys():
+            self.utc.append(self.nmeadict[keyy][0])
             self.dates.append(datetime.datetime.strptime(self.nmeadict[keyy][0],'%H:%M:%S'))
             self.numSV.append(float(self.nmeadict[keyy][3]))
             try:    self.hdop.append(float(self.nmeadict[keyy][4]))
@@ -275,27 +374,7 @@ class nmea_main:
                  
    
     
-    def openNmea(self):
-        self.nmeadoc=QTextDocument()
-        self.nmeacur=QTextCursor(self.nmeadoc)
-        try:
-            self.nmeafile=open(self.dlg.ui.lineEdit.text()) 
-        except:
-            QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file")
-           
-        start=time.time()  
-        '''
-        for line in self.nmeafile:
-            self.nmeacur.insertText(line)
-        '''
-         
-        
-        self.nmeaDict(self.nmeafile,1)
-        self.dlg2.ui.nmeaBrowser.setDocument(self.nmeadoc)
-        self.plotmat()
-        end=time.time()
-        QMessageBox.information(self.iface.mainWindow(),"info",str(end-start))
-        self.dlg2.show()
+
         
         
         
