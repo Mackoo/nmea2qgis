@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- nmea_mainDialog
+ nmea_main
                                  A QGIS plugin
  load nmea file to qgis
                              -------------------
@@ -18,34 +18,36 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+ This script initializes the plugin, making it known to QGIS.
 """
 
-from PyQt4 import QtCore, QtGui
-from ui_nmea_main import Ui_nmea_main
-from ui_nmea import Ui_nmea
-from ui_settings import Ui_Dialog
-# create the dialog for zoom to point
+
+def name():
+    return "nmea2qgis"
 
 
-class nmea_Dialog(QtGui.QDialog):
-    def __init__(self):
-        QtGui.QDialog.__init__(self)
-        # Set up the user interface from Designer.
-        self.ui = Ui_nmea()
-        self.ui.setupUi(self)
+def description():
+    return "load nmea file to qgis"
 
-class nmea_mainDialog(QtGui.QDialog):
-    def __init__(self):
-        QtGui.QDialog.__init__(self)
-        # Set up the user interface from Designer.
-        self.ui = Ui_nmea_main()
-        self.ui.setupUi(self)
-        
-class nmea_settDialog(QtGui.QDialog):
-    def __init__(self):
-        QtGui.QDialog.__init__(self)
-        # Set up the user interface from Designer.
-        self.ui = Ui_Dialog()
-        #QtCore.QObject.connect(self.ui.utcCheck, SIGNAL('stateChanged(int)'),nmea_Dialog.ui.utcCheck.setCheckState(True))
-        
-        self.ui.setupUi(self)
+
+def version():
+    return "Version 0.1"
+
+
+def icon():
+    return "icon.png"
+
+
+def qgisMinimumVersion():
+    return "1.8"
+
+def author():
+    return "Maciej Olszewski"
+
+def email():
+    return "mackoo@opoczta.pl"
+
+def classFactory(iface):
+    # load nmea_main class from file nmea_main
+    from nmea_main import nmea_main
+    return nmea_main(iface)
