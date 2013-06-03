@@ -27,7 +27,7 @@ from qgis.core import *
 import resources
 # Import the code for the dialog
 from nmea_dialog import nmea_Dialog,nmea_mainDialog,nmea_settDialog
-import datetime, time,os,string
+import datetime, time,os,string,numpy
 
 class nmea_main:
 
@@ -79,8 +79,11 @@ class nmea_main:
         self.iface.addPluginToMenu(u"&nmea2qgis", self.action)
         self.fd = QFileDialog()
         self.fd1 = QFileDialog()
-        self.fd.setDirectory("C:\Users\Maciek\Documents\GIG\magisterka\STD Oszczak\praca_mag")
-        
+        settings=QSettings()
+        dir=settings.value('/nmea2qgis/dir', QVariant('C:\Users')).toString()
+        #self.fd.setDirectory("C:\Users\Maciek\Documents\GIG\magisterka\STD Oszczak\praca_mag")
+        QMessageBox.information(self.iface.mainWindow(), 'info', dir)
+        self.fd.setDirectory(dir)
     def unload(self):
         self.iface.removePluginMenu(u"&nmea2qgis", self.action)
         self.iface.removeToolBarIcon(self.action)
@@ -96,6 +99,8 @@ class nmea_main:
         from os.path import isfile
         if isfile(self.filename):
             self.dlg.ui.lineEdit.setText(self.filename)
+            settings=QSettings()
+            settings.setValue('/nmea2qgis/dir',QVariant(self.filename))
             self.fd.setDirectory(os.path.dirname(str(self.filename)))
 
             
@@ -124,7 +129,7 @@ class nmea_main:
         start=time.time() 
         self.nmeaDict(self.nmeafile,1)
         self.dlg2.ui.nmeaBrowser.setDocument(self.nmeadoc)
-        self.plotmat()
+        #self.plotmat()
         end=time.time()
         QMessageBox.information(self.iface.mainWindow(),"info",str(end-start))    
         self.dlg2.show() 
@@ -166,8 +171,9 @@ class nmea_main:
                     #QMessageBox.critical(self.iface.mainWindow(), 'info', line)
                     continue
         nmeafile.close() 
-               
-               
+        
+        self.dates=[]    
+        self.utc=[]       
         self.lat=[]       
         self.lon=[]       
         self.numSV=[]
@@ -175,12 +181,11 @@ class nmea_main:
         self.vdop=[] 
         self.pdop=[] 
         self.msl=[] 
-        self.dates=[] 
         self.geoid=[]    
         self.speed=[]  
         self.fixstatus=[]    
         self.datastatus=[]
-        self.utc=[]
+        
         for keyy in self.nmeadict.keys():
             self.utc.append(self.nmeadict[keyy][0])
             self.dates.append(datetime.datetime.strptime(self.nmeadict[keyy][0],'%H:%M:%S'))
@@ -215,6 +220,16 @@ class nmea_main:
         pr = nmealayer.dataProvider()
         att=[]
         a=0
+        if self.dlg3.ui.latCheck.isChecked():
+               pr.addAttributes( [ QgsField("latitude", QVariant.Double)] )
+               att.append(self.lat)
+               fields[a]=QgsField("latitude", QVariant.Double)
+               a+=1 
+        if self.dlg3.ui.lonCheck.isChecked():
+               pr.addAttributes( [ QgsField("longitude", QVariant.Double)] )
+               att.append(self.lon)
+               fields[a]=QgsField("longitude", QVariant.Double)
+               a+=1 
         if self.dlg3.ui.utcCheck.isChecked():
                pr.addAttributes( [ QgsField("utc", QVariant.String)] )
                att.append(self.utc)
@@ -245,7 +260,28 @@ class nmea_main:
                att.append(self.msl)
                fields[a]=QgsField("msl", QVariant.Double)
                a+=1
+        if self.dlg3.ui.geoidCheck.isChecked():
+               pr.addAttributes( [ QgsField("geoid", QVariant.Double)] )
+               att.append(self.geoid)
+               fields[a]=QgsField("geoid", QVariant.Double)
+               a+=1
+        if self.dlg3.ui.speedCheck.isChecked():
+               pr.addAttributes( [ QgsField("speed", QVariant.Double)] )
+               att.append(self.speed)
+               fields[a]=QgsField("speed", QVariant.Double)
+               a+=1
+        if self.dlg3.ui.fixstatusCheck.isChecked():
+               pr.addAttributes( [ QgsField("fixstatus", QVariant.Double)] )
+               att.append(self.fixstatus)
+               fields[a]=QgsField("fixstatus", QVariant.Double)
+               a+=1               
+        if self.dlg3.ui.datastatusCheck.isChecked():
+               pr.addAttributes( [ QgsField("datastatus", QVariant.Double)] )
+               att.append(self.datastatus)
+               fields[a]=QgsField("datastatus", QVariant.Double)
+               a+=1              
                
+                              
                
         fett=[]
         for a,lat in enumerate(self.lat):
@@ -259,7 +295,7 @@ class nmea_main:
             
         if self.dlg3.ui.saveCheck.isChecked(): 
             self.filename = self.fd.getSaveFileName()
-            writer = QgsVectorFileWriter(self.filename, "CP1250", fields, QGis.WKBPoint, self.epsg4326, self.dlg2.ui.formatCombo.currentText())
+            writer = QgsVectorFileWriter(self.filename, "CP1250", fields, QGis.WKBPoint, self.epsg4326, "ESRI Shapefile")
             for fet in fett:
                 writer.addFeature(fet)
             del writer
@@ -268,8 +304,8 @@ class nmea_main:
         nmealayer.commitChanges()
         nmealayer.updateExtents()
         QgsMapLayerRegistry.instance().addMapLayer(nmealayer)
- 
         
+        self.iface.mapCanvas().zoomToFullExtent()
         self.dlg2.ui.matplot1.canvas.ax1.clear()
         self.dlg2.ui.matplot1.canvas.ax2.clear()
         self.dlg2.ui.nmeaBrowser.clear()
@@ -284,8 +320,10 @@ class nmea_main:
         self.dlg2.ui.matplot1.canvas.ax1.cla()
         self.dlg2.ui.matplot1.canvas.ax2.cla()
         self.dlg2.ui.matplot1.canvas.ax1.vlines(self.dates,0,self.oy1,lw=5,rasterized=True)
+        #self.dlg2.ui.matplot1.canvas.ax1.bar(self.dates,self.oy1)
         self.dlg2.ui.matplot1.canvas.ax1.xaxis_date()
         self.dlg2.ui.matplot1.canvas.ax2.vlines(self.dates,0,self.oy2,lw=5,rasterized=True)
+        #self.dlg2.ui.matplot1.canvas.ax2.bar(self.dates,self.oy1)
         self.dlg2.ui.matplot1.canvas.ax2.xaxis_date()
         self.dlg2.ui.matplot1.canvas.fig.autofmt_xdate()
         self.dlg2.ui.matplot1.canvas.draw()  
