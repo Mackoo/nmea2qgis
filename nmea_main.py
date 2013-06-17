@@ -60,7 +60,6 @@ class nmea_main:
         QObject.connect(self.dlg.ui.addBut,SIGNAL("clicked()"), self.addLayer)
         QObject.connect(self.dlg.ui.settBut,SIGNAL("clicked()"), self.sett)
         
-
         QObject.connect(self.dlg2.ui.addBut,SIGNAL("clicked()"), self.addSave)
         QObject.connect(self.dlg2.ui.mat1Combo,SIGNAL("currentIndexChanged(int)"), self.chmat1)
         QObject.connect(self.dlg2.ui.mat2Combo,SIGNAL("currentIndexChanged(int)"), self.chmat2)
@@ -82,7 +81,7 @@ class nmea_main:
         settings=QSettings()
         dir=settings.value('/nmea2qgis/dir', QVariant('C:\Users')).toString()
         #self.fd.setDirectory("C:\Users\Maciek\Documents\GIG\magisterka\STD Oszczak\praca_mag")
-        QMessageBox.information(self.iface.mainWindow(), 'info', dir)
+        #QMessageBox.information(self.iface.mainWindow(), 'info', dir)
         self.fd.setDirectory(dir)
     def unload(self):
         self.iface.removePluginMenu(u"&nmea2qgis", self.action)
@@ -129,9 +128,9 @@ class nmea_main:
         start=time.time() 
         self.nmeaDict(self.nmeafile,1)
         self.dlg2.ui.nmeaBrowser.setDocument(self.nmeadoc)
-        #self.plotmat()
+        self.plotmat()
         end=time.time()
-        QMessageBox.information(self.iface.mainWindow(),"info",str(end-start))    
+        #QMessageBox.information(self.iface.mainWindow(),"info",str(end-start))    
         self.dlg2.show() 
             
         #except:
@@ -147,7 +146,7 @@ class nmea_main:
             #QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file")
 
     def nmeaDict(self,nmeafile,insert):
-
+        start=time.time()
         self.nmeadict={}
         nmeafile.seek(0)
      
@@ -170,6 +169,9 @@ class nmea_main:
                 except:
                     #QMessageBox.critical(self.iface.mainWindow(), 'info', line)
                     continue
+        
+        end=time.time()
+        #QMessageBox.information(self.iface.mainWindow(),'info',str(end-start))
         nmeafile.close() 
         
         self.dates=[]    
