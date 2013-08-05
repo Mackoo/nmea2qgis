@@ -25,7 +25,7 @@ from PyQt4.QtGui import *
 from qgis.core import *
 # Initialize Qt resources from file resources.py
 import resources
-# Import the code for the dialog
+# Import the code for the dialog`
 from nmea_dialog import nmea_Dialog,nmea_mainDialog,nmea_settDialog
 import datetime, time,os,string,numpy
 
@@ -35,19 +35,19 @@ class nmea_main:
         # Save reference to the QGIS interface
         self.iface = iface
         # initialize plugin directory
-        self.plugin_dir = QFileInfo(QgsApplication.qgisUserDbFilePath()).path() + "/python/plugins/nmea2qgis"
+##        self.plugin_dir = QFileInfo(QgsApplication.qgisUserDbFilePath()).path() + "/python/plugins/nmea2qgis"
         # initialize locale
-        localePath = ""
-        locale = QSettings().value("locale/userLocale").toString()[0:2]
-        if QFileInfo(self.plugin_dir).exists():
-            localePath = self.plugin_dir + "/i18n/nmea_main_" + locale + ".qm"
-
-        if QFileInfo(localePath).exists():
-            self.translator = QTranslator()
-            self.translator.load(localePath)
-
-            if qVersion() > '4.3.3':
-                QCoreApplication.installTranslator(self.translator)
+##        localePath = ""
+##        locale = QSettings().value("locale/userLocale").toString()[0:2]
+##        if QFileInfo(self.plugin_dir).exists():
+##            localePath = self.plugin_dir + "/i18n/nmea_main_" + locale + ".qm"
+##
+##        if QFileInfo(localePath).exists():
+##            self.translator = QTranslator()
+##            self.translator.load(localePath)
+##
+##            if qVersion() > '4.3.3':
+##                QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
         self.dlg = nmea_mainDialog()
