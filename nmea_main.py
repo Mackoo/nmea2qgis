@@ -142,7 +142,7 @@ class nmea_main:
             QMessageBox.critical(self.iface.mainWindow(), 'info', 'cannot connect to database')
 
         cur=self.connectionObject.cursor()
-        qu="CREATE TABLE nmea2GGA(utc datetime primary key, lat real,lon real, fixstatus integer, numsv integer, hdop real, msl real, geoid real,speed real, datastatus text)"
+        qu="CREATE TABLE nmea2GGA(utc datetime primary key, lat real,lon real, fixstatus integer, numsv integer, hdop real,vdop real,pdop real, msl real, geoid real,speed real, datastatus text)"
         cur.execute(qu)
         self.connectionObject.commit()
 
@@ -171,7 +171,7 @@ class nmea_main:
         except:
             QMessageBox.critical(self.iface.mainWindow(), 'info', 'cannot connect to database')
         cur=self.connectionObject.cursor()
-        qu="CREATE TABLE nmea2GGA(utc datetime primary key, lat real,lon real, fixstatus integer, numsv integer, hdop real, msl real, geoid real,speed real, datastatus text)"
+        qu="CREATE TABLE nmea2GGA(utc datetime primary key, lat real,lon real, fixstatus integer, numsv integer, hdop real,vdop real,pdop real, msl real, geoid real,speed real, datastatus text)"
         cur.execute(qu)
         self.connectionObject.commit()
         self.nmeaDict(nmeafile,self.connectionObject)
@@ -218,6 +218,7 @@ class nmea_main:
         self.dlg.close()
 
     def addSave(self):
+
         fields = {}
         self.epsg4326= QgsCoordinateReferenceSystem()
         self.epsg4326.createFromString("epsg:4326")
@@ -253,19 +254,23 @@ class nmea_main:
                pr.addAttributes( [ QgsField("hdop", QVariant.Double)] )
 ##               att.append(self.hdop)
                fields[a]=QgsField("hdop", QVariant.Double)
+               qu+=',hdop'
                a+=1
         if self.dlg3.ui.vdopCheck.isChecked():
                pr.addAttributes( [ QgsField("vdop", QVariant.Double)] )
 ##               att.append(self.vdop)
                fields[a]=QgsField("vdop", QVariant.Double)
+               qu+=',vdop'
                a+=1
         if self.dlg3.ui.pdopCheck.isChecked():
                pr.addAttributes( [ QgsField("pdop", QVariant.Double)] )
 ##               att.append(self.pdop)
                fields[a]=QgsField("pdop", QVariant.Double)
+               qu+=',pdop'
                a+=1
         if self.dlg3.ui.mslCheck.isChecked():
                pr.addAttributes( [ QgsField("msl", QVariant.Double)] )
+               qu+=',msl'
 ##               att.append(self.msl)
                fields[a]=QgsField("msl", QVariant.Double)
                a+=1
@@ -273,25 +278,32 @@ class nmea_main:
                pr.addAttributes( [ QgsField("geoid", QVariant.Double)] )
 ##               att.append(self.geoid)
                fields[a]=QgsField("geoid", QVariant.Double)
+               qu+=',geoid'
                a+=1
         if self.dlg3.ui.speedCheck.isChecked():
                pr.addAttributes( [ QgsField("speed", QVariant.Double)] )
 ##               att.append(self.speed)
                fields[a]=QgsField("speed", QVariant.Double)
+               qu+=',speed'
                a+=1
         if self.dlg3.ui.fixstatusCheck.isChecked():
                pr.addAttributes( [ QgsField("fixstatus", QVariant.Double)] )
 ##               att.append(self.fixstatus)
                fields[a]=QgsField("fixstatus", QVariant.Double)
+               qu+=',fixstatus'
                a+=1
         if self.dlg3.ui.datastatusCheck.isChecked():
                pr.addAttributes( [ QgsField("datastatus", QVariant.Double)] )
 ##               att.append(self.datastatus)
                fields[a]=QgsField("datastatus", QVariant.Double)
+               qu+=',datastatus'
                a+=1
 
         cur=self.connectionObject.cursor()
-        qu=qu+""" FROM nmea2GGA"""
+        qu=qu+""" FROM nmea2GGA """
+        qu=qu+str(self.dlg2.ui.sqlText.toPlainText())
+        #QMessageBox.information(self.iface.mainWindow(),"info",str(a))
+
         cur.execute(qu)
         fetched=cur.fetchall()
 
@@ -327,7 +339,7 @@ class nmea_main:
     def plotmat(self,data,data2):
         cur=self.connectionObject.cursor()
         qu1="""select utc,"""+data+""","""+data2+""" from nmea2GGA"""
-        QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
+        #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
         cur.execute(str(qu1))
         fetched=cur.fetchall()
         dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]

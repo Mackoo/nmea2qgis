@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_nmea.ui'
 #
-# Created: Thu May 30 17:41:46 2013
+# Created: Tue Aug 27 18:38:14 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,8 +34,17 @@ class Ui_nmea(object):
         nmea.setSizePolicy(sizePolicy)
         self.verticalLayout = QtGui.QVBoxLayout(nmea)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.addBut = QtGui.QPushButton(nmea)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.addBut.sizePolicy().hasHeightForWidth())
+        self.addBut.setSizePolicy(sizePolicy)
+        self.addBut.setIconSize(QtCore.QSize(40, 16))
+        self.addBut.setObjectName(_fromUtf8("addBut"))
+        self.verticalLayout.addWidget(self.addBut)
         self.tabWidget = QtGui.QTabWidget(nmea)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.tabWidget.sizePolicy().hasHeightForWidth())
@@ -58,14 +67,6 @@ class Ui_nmea(object):
         self.horizontalLayout.addWidget(self.nmeaBrowser)
         self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
-        self.addBut = QtGui.QPushButton(self.tab)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.addBut.sizePolicy().hasHeightForWidth())
-        self.addBut.setSizePolicy(sizePolicy)
-        self.addBut.setObjectName(_fromUtf8("addBut"))
-        self.verticalLayout_3.addWidget(self.addBut)
         spacerItem = QtGui.QSpacerItem(30, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_3.addItem(spacerItem)
         self.senCom = QtGui.QComboBox(self.tab)
@@ -117,16 +118,37 @@ class Ui_nmea(object):
         self.verticalLayout_2.addWidget(self.mat2Combo)
         self.horizontalLayout_3.addLayout(self.verticalLayout_2)
         self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
+        self.tab_3 = QtGui.QWidget()
+        self.tab_3.setObjectName(_fromUtf8("tab_3"))
+        self.verticalLayoutWidget = QtGui.QWidget(self.tab_3)
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(10, 10, 741, 601))
+        self.verticalLayoutWidget.setObjectName(_fromUtf8("verticalLayoutWidget"))
+        self.verticalLayout_4 = QtGui.QVBoxLayout(self.verticalLayoutWidget)
+        self.verticalLayout_4.setSizeConstraint(QtGui.QLayout.SetNoConstraint)
+        self.verticalLayout_4.setMargin(0)
+        self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
+        self.label = QtGui.QLabel(self.verticalLayoutWidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.verticalLayout_4.addWidget(self.label)
+        self.sqlText = QtGui.QTextEdit(self.verticalLayoutWidget)
+        self.sqlText.setObjectName(_fromUtf8("sqlText"))
+        self.verticalLayout_4.addWidget(self.sqlText)
+        self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
         self.verticalLayout.addWidget(self.tabWidget)
 
         self.retranslateUi(nmea)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(nmea)
 
     def retranslateUi(self, nmea):
         nmea.setWindowTitle(_translate("nmea", "nmea_main", None))
         self.addBut.setText(_translate("nmea", "add layer", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("nmea", "Tab 1", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("nmea", "NMEA", None))
         self.mat1Combo.setItemText(0, _translate("nmea", "numSV", None))
         self.mat1Combo.setItemText(1, _translate("nmea", "hdop", None))
         self.mat1Combo.setItemText(2, _translate("nmea", "vdop", None))
@@ -143,6 +165,8 @@ class Ui_nmea(object):
         self.mat2Combo.setItemText(5, _translate("nmea", "geoid", None))
         self.mat2Combo.setItemText(6, _translate("nmea", "speed", None))
         self.mat2Combo.setItemText(7, _translate("nmea", "datastatus", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("nmea", "Tab 2", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("nmea", "GRAPH", None))
+        self.label.setText(_translate("nmea", "SQL WHERE CLAUSE:", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("nmea", "SQL", None))
 
 from graphs import mplc
