@@ -85,7 +85,7 @@ class nmea_main:
         self.fd = QFileDialog()
         self.fd1 = QFileDialog()
         settings=QSettings()
-        dir=settings.value('/nmea2dbqgis/dir', QVariant('C:\Users')).toString()
+        dir=settings.value('/nmea2qgis/dir', QVariant('C:\Users')).toString()
         #self.fd.setDirectory("C:\Users\Maciek\Documents\GIG\magisterka\STD Oszczak\praca_mag")
 
 
@@ -170,8 +170,19 @@ class nmea_main:
             #QMessageBox.critical(self.iface.mainWindow(), 'info', 'connected to database')
         except:
             QMessageBox.critical(self.iface.mainWindow(), 'info', 'cannot connect to database')
+
         cur=self.connectionObject.cursor()
-        qu="CREATE TABLE nmea2GGA(utc datetime primary key, lat real,lon real, fixstatus integer, numsv integer, hdop real,vdop real,pdop real, msl real, geoid real,speed real, datastatus text)"
+        qu="CREATE TABLE nmeaGGA(utcgga datetime primary key, latgga real,longga real, fixstatus integer, numsv integer, hdop real, msl real, geoid real)"
+        cur.execute(qu)
+        qu="CREATE TABLE nmeaRMC(utcrmc datetime primary key, latrmc real,lonrmc real,speed real, datastatus text)"
+        cur.execute(qu)
+        qu="CREATE TABLE nmeaGLL(utcgll datetime primary key, latgll real,longll real, datastatus text)"
+        cur.execute(qu)
+
+        qu="CREATE VIEW nmea3 as select case when t1.utcgga is null "
+        qu+="then t2.utcrmc     else t1.utcgga     end as utc  ,case when t1.latgga is null     then t2.latrmc     else t1.latgga     end as lat  ,case when t1.longga is null     then t2.lonrmc     else t1.longga     end as lon   from nmeaGGA t1 left outer join nmeaRMC t2 on t1.utcgga=t2.utcrmc  union all   select case when t1.utcrmc is null     then t2.utcgga     else t1.utcrmc     end as utc  ,case when t1.latrmc is null     then t2.latgga     else t1.latrmc     end as lat  ,case when t1.lonrmc is null     then t2.longga     else t1.lonrmc     end as lon from nmeaRMC t1 left outer join nmeaGGA t2 on t2.utcgga=t1.utcrmc where t2.utcgga is null  union all   select case when t1.utcgll is null     then t2.utcgga     else t1.utcgll     end as utc  ,case when t1.latgll is null     then t2.latgga     else t1.latgll     end as lat  ,case when t1.longll is null     then t2.longga "
+        qu+="else t1.longll     end as lon from nmeaGLL t1 left outer join nmeaGGA t2 on t2.utcgga=t1.utcgll where t2.utcgga is null    order by utc"
+        QMessageBox.information(self.iface.mainWindow(), "Info", qu)
         cur.execute(qu)
         self.connectionObject.commit()
         self.nmeaDict(nmeafile,self.connectionObject)
@@ -180,38 +191,39 @@ class nmea_main:
             #QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file")
 
     def nmeaDict(self,nmeafile,connectionObject):
-        nmeafile.seek(0)
-        for line in nmeafile:
-             linee=line.split(',')
-             if line[3:6]=='GGA' or line[3:6]=='RMC':
-                 cur=connectionObject.cursor()
-                 key=linee[1][:2]+':'+linee[1][2:4]+':'+linee[1][4:6]
-                 qu="""insert or ignore into nmea2GGA(utc) values('"""+key+"""')"""
-                 #QMessageBox.information(self.iface.mainWindow(), 'inff', qu)
-                 cur.execute(qu)
-
-             if line[3:6]=='GLL':
-                 cur=connectionObject.cursor()
-                 key=linee[5][:2]+':'+linee[5][2:4]+':'+linee[5][4:6]
-                 qu="""insert or ignore into nmea2GGA(utc) values('"""+key+"""')"""
-                 #QMessageBox.information(self.iface.mainWindow(), 'inff2', qu)
-                 cur.execute(qu)
-        connectionObject.commit()
+##        nmeafile.seek(0)
+##        for line in nmeafile:
+##             linee=line.split(',')
+##             if line[3:6]=='GGA' or line[3:6]=='RMC':
+##                 cur=connectionObject.cursor()
+##                 key=linee[1][:2]+':'+linee[1][2:4]+':'+linee[1][4:6]
+##                    ## qu="""insert or ignore into nmeaGGA(utc) values('"""+key+"""')"""
+##                 #QMessageBox.information(self.iface.mainWindow(), 'inff', qu)
+##                 cur.execute(qu)
+##
+##             if line[3:6]=='GLL':
+##                 cur=connectionObject.cursor()
+##                 key=linee[5][:2]+':'+linee[5][2:4]+':'+linee[5][4:6]
+##                 qu="""insert or ignore into nmea2GGA(utc) values('"""+key+"""')"""
+##                 #QMessageBox.information(self.iface.mainWindow(), 'inff2', qu)
+##                 cur.execute(qu)
+##        connectionObject.commit()
 
         nmeafile.seek(0)
         from funkcje_parse import funkcje
         funkcje=funkcje()
         for line in nmeafile:
-            if line.startswith('$'):
+            if line[3:6]=='GGA' or line[3:6]=='RMC'or line[3:6]=='GLL':
                 try:
                     parser={'GGA':funkcje.par_gga,'RMC':funkcje.par_rmc,'GLL':funkcje.par_gll}[line[3:6]]
                     query=parser(line)
-##                    QMessageBox.information(self.iface.mainWindow(), 'info', query)
+                    #QMessageBox.information(self.iface.mainWindow(), 'info', query)
                     cursor=connectionObject.cursor()
                     cursor.execute(query)
                 except:
-                    #QMessageBox.critical(self.iface.mainWindow(), 'info', line)
+                    #QMessageBox.critical(self.iface.mainWindow(), 'error', line)
                     continue
+
         connectionObject.commit()
 
         nmeafile.close()
@@ -300,7 +312,7 @@ class nmea_main:
                a+=1
 
         cur=self.connectionObject.cursor()
-        qu=qu+""" FROM nmea2GGA """
+        qu=qu+""" FROM nmea3 """
         qu=qu+str(self.dlg2.ui.sqlText.toPlainText())
         #QMessageBox.information(self.iface.mainWindow(),"info",str(a))
 

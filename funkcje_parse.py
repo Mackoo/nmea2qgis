@@ -13,7 +13,7 @@ class funkcje:
         msl=data[9]
         geoid=data[11]
         fixstatus=data[6]
-        query="""update nmea2GGA set lat="""+str(latt)+""",lon="""+str(lonn)+""",fixstatus="""+str(fixstatus)+""",numsv="""+str(numsv)+""",hdop="""+str(hdop)+""",msl="""+str(msl)+""",geoid="""+str(geoid)+""" where utc='"""+utc+"""';"""
+        query="""insert into nmeaGGA values('"""+str(utc)+"""',"""+str(latt)+""","""+str(lonn)+""","""+str(fixstatus)+""","""+str(numsv)+""","""+str(hdop)+""","""+str(msl)+""","""+str(geoid)+""");"""
         return query
 
 
@@ -28,7 +28,7 @@ class funkcje:
         speed=data[7]
         datastatus=data[2]
 
-        query="""update nmea2GGA set lat="""+str(latt)+""",lon="""+str(lonn)+""",speed="""+str(speed)+""",datastatus='"""+str(datastatus)+"""' where utc='"""+utc+"""';"""
+        query="""insert into nmeaRMC values('"""+str(utc)+"""',"""+str(latt)+""","""+str(lonn)+""","""+str(speed)+""",'"""+str(datastatus)+"""');"""
         return query
 
     def par_gll(self,line):
@@ -40,5 +40,5 @@ class funkcje:
         ind=string.find(data[3],".")
         lonn=float(data[3][:(ind-2)])+float(data[3][(ind-2):])/60
         datastatus=data[6]
-        query="""update nmea2GGA set lat="""+str(latt)+""",lon="""+str(lonn)+""",datastatus='"""+str(datastatus)+"""' where utc='"""+utc+"""';"""
+        query="""insert into nmeaGLL values('"""+str(utc)+"""',"""+str(latt)+""","""+str(lonn)+""",'"""+str(datastatus)+"""');"""
         return query
