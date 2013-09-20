@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_nmea_main.ui'
 #
-# Created: Thu May 30 15:02:33 2013
+# Created: Fri Sep 20 10:49:00 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -86,9 +86,9 @@ class Ui_nmea_main(object):
 
     def retranslateUi(self, nmea_main):
         nmea_main.setWindowTitle(_translate("nmea_main", "nmea_main", None))
-        self.ButOpenNmea.setText(_translate("nmea_main", "open NMEA", None))
-        self.pushButton.setText(_translate("nmea_main", "search", None))
-        self.settBut.setText(_translate("nmea_main", "Settings", None))
-        self.addBut.setText(_translate("nmea_main", "addLayer", None))
+        self.ButOpenNmea.setText(_translate("nmea_main", "View NMEA", None))
+        self.pushButton.setText(_translate("nmea_main", "Browse", None))
+        self.settBut.setText(_translate("nmea_main", "NMEA sentence settings", None))
+        self.addBut.setText(_translate("nmea_main", "Add NMEA Layer", None))
         self.ButExit.setText(_translate("nmea_main", "cancel", None))
 
