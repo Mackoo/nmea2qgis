@@ -65,6 +65,7 @@ class nmea_main:
         QObject.connect(self.dlg.ui.settBut,SIGNAL("clicked()"), self.sett)
         QObject.connect(self.dlg2.ui.addBut,SIGNAL("clicked()"), self.addSave)
         QObject.connect(self.dlg2.ui.sqlCheck,SIGNAL("clicked()"), self.whereSet)
+        QObject.connect(self.dlg2.ui.resetBut,SIGNAL("clicked()"), self.populateSql)
 
         QObject.connect(self.dlg2.ui.sentCombo,SIGNAL("currentIndexChanged(int)"), self.ggaOnly)
         QObject.connect(self.dlg2.ui.mat1Combo,SIGNAL("currentIndexChanged(int)"), self.chmat1)
@@ -142,6 +143,7 @@ class nmea_main:
 
         self.plotmat(self.dlg2.ui.mat1Combo.currentText(),self.dlg2.ui.mat2Combo.currentText())
         self.whereSet()
+        self.populateSql()
         self.dlg2.show()
         #except:
             #QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file")
@@ -274,7 +276,42 @@ class nmea_main:
 
         cur=self.connectionObject.cursor()
         qu=qu+""" FROM nmea23 """
-        qu=qu+str(self.dlg2.ui.sqlText.toPlainText())
+
+        uii=self.dlg2.ui
+
+        if uii.sqlCheck.isChecked():
+            qu=qu+""" where 1"""
+            if uii.utcCheck.isChecked():
+                qu=qu+""" and utc between """+ str(uii.spinBox_10.value())+""":"""+str(uii.spinBox_11.value())+""":"""+str(uii.spinBox_12.value())+""" and """+ str(uii.spinBox_13.value())+""":"""+str(uii.spinBox_14.value())+""":"""+str(uii.spinBox_15.value())
+            if uii.numsvCheck1.isChecked():
+                qu=qu+""" and numsv= """+ str(uii.spinBox_16.value())
+            if uii.hdopCheck1.isChecked():
+                qu=qu+""" and hdop= """+ str(uii.doubleSpinBox.value())
+            if uii.mslCheck1.isChecked():
+                qu=qu+""" and msl= """+ str(uii.doubleSpinBox_4.value())
+            if uii.geoidCheck1.isChecked():
+                qu=qu+""" and geoid= """+ str(uii.doubleSpinBox_7.value())
+            if uii.speedCheck1.isChecked():
+                qu=qu+""" and speed= """+ str(uii.doubleSpinBox_10.value())
+            if uii.datastatusCheck1.isChecked():
+                qu=qu+""" and datastatus= """+ str(uii.spinBox_19.value())
+            if uii.fixstatusCheck1.isChecked():
+                qu=qu+""" and fix= """+ str(uii.spinBox_20.value())
+
+            if uii.numsvCheck2.isChecked():
+                qu=qu+""" and numsv between """+ str(uii.spinBox_17.value())+""" and """+str(uii.spinBox_18.value())
+            if uii.hdopCheck2.isChecked():
+                qu=qu+""" and hdop between """+str(uii.doubleSpinBox_2.value())+""" and """+str(uii.doubleSpinBox_3.value())
+            if uii.mslCheck2.isChecked():
+                qu=qu+""" and msl between """+str(uii.doubleSpinBox_5.value())+""" and """+str(uii.doubleSpinBox_6.value())
+            if uii.geoidCheck2.isChecked():
+                qu=qu+""" and geoid between """+str(+uii.doubleSpinBox_8.value())+""" and """+str(uii.doubleSpinBox_9.value())
+            if uii.speedCheck2.isChecked():
+                qu=qu+""" and speed between """+str(uii.doubleSpinBox_11.value())+""" and """+str(uii.doubleSpinBox_12.value())
+
+
+
+        #qu=qu+str(self.dlg2.ui.sqlText.toPlainText())
         QMessageBox.information(self.iface.mainWindow(),"info",qu)
 
         cur.execute(qu)
@@ -306,6 +343,82 @@ class nmea_main:
 ##        self.dlg2.ui.nmeaBrowser.clear()
         self.dlg2.close()
 
+
+    def populateSql(self):
+
+        query="""select min(utc),max(utc),min(numsv),max(numsv),min(hdop),max(hdop),min(msl),max(msl),min(geoid),max(geoid),min(speed),max(speed) from nmea23"""
+
+        cursor=self.connectionObject.cursor()
+        cursor.execute(query)
+        f=cursor.fetchall()
+        #self.connectionObject.commit()
+        ff=[]
+        for i in range(len(f[0])):
+            #QMessageBox.information(self.iface.mainWindow(), 'info', str(f[0][i]))
+            if str(f[0][i]) =='None':
+                ff.append(0)
+            else:
+                ff.append(f[0][i])
+
+##
+##        for ff in f[0]:
+##            QMessageBox.information(self.iface.mainWindow(), 'info', str(ff))
+
+
+
+        uii=self.dlg2.ui
+        uii.spinBox_10.setMinimum(int(ff[0][0:2]))
+
+        uii.spinBox_13.setMinimum(int(ff[0][0:2]))
+
+        uii.spinBox_16.setMinimum(int(ff[2]))
+        uii.spinBox_17.setMinimum(int(ff[2]))
+        uii.spinBox_18.setMinimum(int(ff[2]))
+
+        uii.doubleSpinBox.setMinimum(float(ff[4]))
+        uii.doubleSpinBox_2.setMinimum(float(ff[4]))
+        uii.doubleSpinBox_3.setMinimum(float(ff[4]))
+        uii.doubleSpinBox_4.setMinimum(float(ff[6]))
+        uii.doubleSpinBox_5.setMinimum(float(ff[6]))
+        uii.doubleSpinBox_6.setMinimum(float(ff[6]))
+        uii.doubleSpinBox_7.setMinimum(float(ff[8]))
+        uii.doubleSpinBox_8.setMinimum(float(ff[8]))
+        uii.doubleSpinBox_9.setMinimum(float(ff[8]))
+        uii.doubleSpinBox_10.setMinimum(float(ff[10]))
+        uii.doubleSpinBox_11.setMinimum(float(ff[10]))
+        uii.doubleSpinBox_12.setMinimum(float(ff[10]))
+
+        uii.spinBox_10.setMaximum(int(ff[1][0:2]))
+        uii.spinBox_13.setMaximum(int(ff[1][0:2]))
+        uii.spinBox_16.setMaximum(int(ff[3]))
+        uii.spinBox_17.setMaximum(int(ff[3]))
+        uii.spinBox_18.setMaximum(int(ff[3]))
+
+        uii.doubleSpinBox.setMaximum(float(ff[5]))
+        uii.doubleSpinBox_2.setMaximum(float(ff[5]))
+        uii.doubleSpinBox_3.setMaximum(float(ff[5]))
+        uii.doubleSpinBox_4.setMaximum(float(ff[7]))
+        uii.doubleSpinBox_5.setMaximum(float(ff[7]))
+        uii.doubleSpinBox_6.setMaximum(float(ff[7]))
+        uii.doubleSpinBox_7.setMaximum(float(ff[9]))
+        uii.doubleSpinBox_8.setMaximum(float(ff[9]))
+        uii.doubleSpinBox_9.setMaximum(float(ff[9]))
+        uii.doubleSpinBox_10.setMaximum(float(ff[11]))
+        uii.doubleSpinBox_11.setMaximum(float(ff[11]))
+        uii.doubleSpinBox_12.setMaximum(float(ff[11]))
+
+        uii.spinBox_10.setMaximum(int(ff[1][0:2]))
+        uii.spinBox_13.setValue(int(ff[1][0:2]))
+        uii.spinBox_18.setValue(int(ff[3]))
+
+
+        uii.doubleSpinBox_3.setValue(float(ff[5]))
+
+        uii.doubleSpinBox_6.setValue(float(ff[7]))
+
+        uii.doubleSpinBox_9.setValue(float(ff[9]))
+
+        uii.doubleSpinBox_12.setValue(float(ff[11]))
 
     def whereSet(self):
         uii=self.dlg2.ui

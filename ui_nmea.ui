@@ -42,7 +42,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -304,6 +304,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="maximum">
+             <number>59</number>
+            </property>
            </widget>
           </item>
           <item>
@@ -317,6 +320,9 @@
            <widget class="QSpinBox" name="spinBox_12">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="maximum">
+             <number>59</number>
             </property>
            </widget>
           </item>
@@ -362,6 +368,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="maximum">
+             <number>59</number>
+            </property>
            </widget>
           </item>
           <item>
@@ -375,6 +384,9 @@
            <widget class="QSpinBox" name="spinBox_15">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="maximum">
+             <number>59</number>
             </property>
            </widget>
           </item>
@@ -484,6 +496,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
            </widget>
           </item>
           <item>
@@ -514,6 +529,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
            </widget>
           </item>
           <item>
@@ -527,6 +545,9 @@
            <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
             </property>
            </widget>
           </item>
@@ -548,6 +569,9 @@
            <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>1</number>
             </property>
            </widget>
           </item>
@@ -579,6 +603,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
            </widget>
           </item>
           <item>
@@ -592,6 +619,9 @@
            <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>1</number>
             </property>
            </widget>
           </item>
@@ -613,6 +643,9 @@
            <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>1</number>
             </property>
            </widget>
           </item>
@@ -644,6 +677,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
            </widget>
           </item>
           <item>
@@ -657,6 +693,9 @@
            <widget class="QDoubleSpinBox" name="doubleSpinBox_9">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>1</number>
             </property>
            </widget>
           </item>
@@ -785,6 +824,19 @@
          </layout>
         </item>
        </layout>
+      </widget>
+      <widget class="QPushButton" name="resetBut">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>460</y>
+         <width>75</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>RESET</string>
+       </property>
       </widget>
      </widget>
     </widget>
