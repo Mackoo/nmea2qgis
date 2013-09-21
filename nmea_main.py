@@ -164,11 +164,11 @@ class nmea_main:
             QMessageBox.critical(self.iface.mainWindow(), 'info', 'cannot connect to database')
 
         cur=self.connectionObject.cursor()
-        qu="CREATE TABLE nmeaGGA(utcgga datetime primary key, latgga real,longga real, fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus text)"
+        qu="CREATE TABLE nmeaGGA(utcgga datetime primary key, latgga real,longga real, fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus integer)"
         cur.execute(qu)
-        qu="CREATE TABLE nmeaRMC(utcrmc datetime primary key, latrmc real,lonrmc real,fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus text)"
+        qu="CREATE TABLE nmeaRMC(utcrmc datetime primary key, latrmc real,lonrmc real,fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus integer)"
         cur.execute(qu)
-        qu="CREATE TABLE nmeaGLL(utcgll datetime primary key, latgll real,longll real, fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus text)"
+        qu="CREATE TABLE nmeaGLL(utcgll datetime primary key, latgll real,longll real, fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus integer)"
         cur.execute(qu)
 
         qu="CREATE VIEW nmea23 as  select case when t1.utcgga is null then "

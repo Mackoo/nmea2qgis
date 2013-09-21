@@ -53,7 +53,7 @@ class funkcje:
         if data[2]=='A':    datastatus=1
         else:   datastatus=0
 
-        query="""insert into nmeaRMC(utcrmc,latrmc,lonrmc,speed,datastatus) values('"""+str(utc)+"""',"""+str(latt)+""","""+str(lonn)+""","""+str(speed)+""",'"""+str(datastatus)+"""');"""
+        query="""insert into nmeaRMC(utcrmc,latrmc,lonrmc,speed,datastatus) values('"""+str(utc)+"""',"""+str(latt)+""","""+str(lonn)+""","""+str(speed)+""","""+str(datastatus)+""");"""
         return query
 
     def par_gll(self,line):
@@ -80,7 +80,7 @@ class funkcje:
         if data[6]=='A':    datastatus=1
         else:   datastatus=0
 
-        query="""insert into nmeaGLL(utcgll,latgll,longll,datastatus) values('"""+str(utc)+"""',"""+str(latt)+""","""+str(lonn)+""",'"""+str(datastatus)+"""');"""
+        query="""insert into nmeaGLL(utcgll,latgll,longll,datastatus) values('"""+str(utc)+"""',"""+str(latt)+""","""+str(lonn)+""","""+str(datastatus)+""");"""
         return query
 
 
