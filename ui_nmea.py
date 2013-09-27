@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_nmea.ui'
 #
-# Created: Sun Sep 22 19:52:15 2013
+# Created: Fri Sep 27 22:04:28 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -91,17 +91,17 @@ class Ui_nmea(object):
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
         self.horizontalLayout_3 = QtGui.QHBoxLayout(self.tab_2)
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.matplot1 = mplc(self.tab_2)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.matplot1.sizePolicy().hasHeightForWidth())
-        self.matplot1.setSizePolicy(sizePolicy)
-        self.matplot1.setObjectName(_fromUtf8("matplot1"))
-        self.horizontalLayout_3.addWidget(self.matplot1)
+        self.verticalLayout_4 = QtGui.QVBoxLayout()
+        self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
+        self.horizontalLayout_3.addLayout(self.verticalLayout_4)
         self.verticalLayout_2 = QtGui.QVBoxLayout()
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.mat1Combo = QtGui.QComboBox(self.tab_2)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.mat1Combo.sizePolicy().hasHeightForWidth())
+        self.mat1Combo.setSizePolicy(sizePolicy)
         self.mat1Combo.setObjectName(_fromUtf8("mat1Combo"))
         self.mat1Combo.addItem(_fromUtf8(""))
         self.mat1Combo.addItem(_fromUtf8(""))
@@ -111,6 +111,11 @@ class Ui_nmea(object):
         self.mat1Combo.addItem(_fromUtf8(""))
         self.verticalLayout_2.addWidget(self.mat1Combo)
         self.mat2Combo = QtGui.QComboBox(self.tab_2)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.mat2Combo.sizePolicy().hasHeightForWidth())
+        self.mat2Combo.setSizePolicy(sizePolicy)
         self.mat2Combo.setObjectName(_fromUtf8("mat2Combo"))
         self.mat2Combo.addItem(_fromUtf8(""))
         self.mat2Combo.addItem(_fromUtf8(""))
@@ -378,10 +383,18 @@ class Ui_nmea(object):
         self.resetBut.setGeometry(QtCore.QRect(20, 460, 75, 23))
         self.resetBut.setObjectName(_fromUtf8("resetBut"))
         self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
+        self.tab_4 = QtGui.QWidget()
+        self.tab_4.setObjectName(_fromUtf8("tab_4"))
+        self.frame = QtGui.QFrame(self.tab_4)
+        self.frame.setGeometry(QtCore.QRect(370, 290, 341, 271))
+        self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.frame.setFrameShadow(QtGui.QFrame.Raised)
+        self.frame.setObjectName(_fromUtf8("frame"))
+        self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
         self.verticalLayout.addWidget(self.tabWidget)
 
         self.retranslateUi(nmea)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(nmea)
 
     def retranslateUi(self, nmea):
@@ -433,5 +446,5 @@ class Ui_nmea(object):
         self.fixstatusCheck1.setText(_translate("nmea", "fixstatus equals:", None))
         self.resetBut.setText(_translate("nmea", "RESET", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("nmea", "SQL", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("nmea", "Strona", None))
 
-from graphs import mplc

@@ -29,6 +29,7 @@ import resources
 from nmea_dialog import nmea_Dialog,nmea_mainDialog,nmea_settDialog
 import datetime, time,os,string,numpy
 from pyspatialite import dbapi2 as db #Load PySpatiaLite
+import PyQt4.Qwt5 as Qwt
 
 
 
@@ -63,7 +64,7 @@ class nmea_main:
         QObject.connect(self.dlg.ui.ButExit,SIGNAL("clicked()"), self.exit)
         QObject.connect(self.dlg.ui.addBut,SIGNAL("clicked()"), self.addLayer)
         QObject.connect(self.dlg.ui.settBut,SIGNAL("clicked()"), self.sett)
-        QObject.connect(self.dlg2.ui.addBut,SIGNAL("clicked()"), self.addSave)
+        QObject.connect(self.dlg2.ui.addBut,SIGNAL("clicked()"), self.addLayer2)
         QObject.connect(self.dlg2.ui.sqlCheck,SIGNAL("clicked()"), self.whereSet)
         QObject.connect(self.dlg2.ui.resetBut,SIGNAL("clicked()"), self.populateSql)
 
@@ -150,9 +151,13 @@ class nmea_main:
 
 
     def addLayer(self):
+
         self.nmeaDict()
         self.addSave()
 
+    def addLayer2(self):
+        self.dlg3.exec_()
+        self.addSave()
 
     def nmeaDict(self):
             nmeafile=open(self.dlg.ui.lineEdit.text())
@@ -659,64 +664,155 @@ class nmea_main:
             uii.doubleSpinBox_11.setEnabled(False)
             uii.doubleSpinBox_12.setEnabled(False)
 
-
     def plotmat(self,data,data2):
+
+##        self.plot = Qwt.QwtPlot(self.dlg2.ui.plotWidget)
+##
+##        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+##
+##        self.plot.setSizePolicy(sizePolicy)
+
+
+
         cur=self.connectionObject.cursor()
         qu1="""select utc,"""+data+""","""+data2+""" from nmea"""
         #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
         cur.execute(str(qu1))
         fetched=cur.fetchall()
         dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
-        yyy1=[f[1] for f in fetched]
-        yyy2=[f[2] for f in fetched]
 
-        self.dlg2.ui.matplot1.canvas.ax1.cla()
-        self.dlg2.ui.matplot1.canvas.ax2.cla()
-        self.dlg2.ui.matplot1.canvas.ax1.vlines(dates,0,yyy1,lw=5,rasterized=True)
-        #self.dlg2.ui.matplot1.canvas.ax1.bar(self.dates,self.oy1)
-        self.dlg2.ui.matplot1.canvas.ax1.xaxis_date()
-        self.dlg2.ui.matplot1.canvas.ax2.vlines(dates,0,yyy2,lw=5,rasterized=True)
-        #self.dlg2.ui.matplot1.canvas.ax2.bar(self.dates,self.oy1)
-        self.dlg2.ui.matplot1.canvas.ax2.xaxis_date()
-        self.dlg2.ui.matplot1.canvas.fig.autofmt_xdate()
-        self.dlg2.ui.matplot1.canvas.draw()
+        #QMessageBox.information(self.iface.mainWindow(), 'inff', str(fetched[1]))
+
+        yyy1=[float(f[1]) for f in fetched]
+        yyy2=[float(f[2]) for f in fetched]
+
+
+        color1 = QColor('limegreen')
+        pen1 = QPen(color1)
+        pen1.setWidth(2)
+        curve1 = Qwt.QwtPlotCurve('aaaa')
+
+        curve1.setPen(pen1)
+        curve1.setData(range(len(yyy1)), yyy1)
+
+        color2 = QColor('red')
+        pen2 = QPen(color2)
+        pen2.setWidth(2)
+        curve2 = Qwt.QwtPlotCurve('bbbb')
+
+        curve2.setPen(pen2)
+        curve2.setData(range(len(yyy2)), yyy2)
+
+##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
+
+        curve1.attach(self.dlg2.plot1)
+        self.dlg2.plot1.replot()
+        curve2.attach(self.dlg2.plot2)
+        self.dlg2.plot2.replot()
+        #self.dlg2.plot.(Qwt.Curve(x, cos(x), Pen(Magenta,2),))
+
 
     def chmat1(self):
+        self.dlg2.plot1.clear()
         cur=self.connectionObject.cursor()
-        qu="""select utc,"""+self.dlg2.ui.mat1Combo.currentText()+""" from nmea"""
-##        QMessageBox.information(self.iface.mainWindow(), 'inff', qu)
-        cur.execute(str(qu))
+        qu1="""select utc,"""+self.dlg2.ui.mat1Combo.currentText()+""" from nmea"""
+        #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
+        cur.execute(str(qu1))
         fetched=cur.fetchall()
-        dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
-        yy=[f[1] for f in fetched]
+        yyy1=[float(f[1]) for f in fetched]
 
-        self.dlg2.ui.matplot1.canvas.ax1.cla()
-        self.dlg2.ui.matplot1.canvas.ax1.vlines(dates,0,yy,lw=5,rasterized=True)
-        #self.dlg2.ui.matplot1.canvas.ax1.xaxis_date()
-        self.dlg2.ui.matplot1.canvas.ax1.grid(True)
-        self.dlg2.ui.matplot1.canvas.fig.autofmt_xdate()
-        self.dlg2.ui.matplot1.canvas.draw()
+        color = QColor('limegreen')
+        curve = Qwt.QwtPlotCurve('aaaa')
+        pen = QPen(color)
+        pen.setWidth(2)
+        curve.setPen(pen)
+        curve.setData(range(len(yyy1)), yyy1)
+
+##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
+
+        curve.attach(self.dlg2.plot1)
+        self.dlg2.plot1.replot()
 
     def chmat2(self):
+        self.dlg2.plot2.clear()
         cur=self.connectionObject.cursor()
-        qu="""select utc,"""+self.dlg2.ui.mat2Combo.currentText()+""" from nmea"""
-        cur.execute(str(qu))
+        qu1="""select utc,"""+self.dlg2.ui.mat2Combo.currentText()+""" from nmea"""
+        #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
+        cur.execute(str(qu1))
         fetched=cur.fetchall()
-        dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
-        yy=[f[1] for f in fetched]
-##        if self.dlg2.ui.mat2Combo.currentText()=="datastatus":
-##            QMessageBox.information(self.iface.mainWindow(), 'info', "datastatus")
-##            zz=[]
-##            for stauts in yy:
-##                if stauts=="A": zz.append(1)
-##                else:   zz.append(0)
-##            yy=zz
-        self.dlg2.ui.matplot1.canvas.ax2.cla()
-        self.dlg2.ui.matplot1.canvas.ax2.vlines(dates,0,yy,lw=5,rasterized=True)
-        #self.dlg2.ui.matplot1.canvas.ax2.xaxis_date()
-        self.dlg2.ui.matplot1.canvas.ax2.grid(True)
-        self.dlg2.ui.matplot1.canvas.fig.autofmt_xdate()
-        self.dlg2.ui.matplot1.canvas.draw()
+        yyy1=[float(f[1]) for f in fetched]
+
+        color = QColor('red')
+        curve = Qwt.QwtPlotCurve('bbbb')
+        pen = QPen(color)
+        pen.setWidth(2)
+        curve.setPen(pen)
+        curve.setData(range(len(yyy1)), yyy1)
+
+##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
+
+        curve.attach(self.dlg2.plot2)
+        self.dlg2.plot2.replot()
+
+
+
+##    def plotmat(self,data,data2):
+##        cur=self.connectionObject.cursor()
+##        qu1="""select utc,"""+data+""","""+data2+""" from nmea"""
+##        #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
+##        cur.execute(str(qu1))
+##        fetched=cur.fetchall()
+##        dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
+##        yyy1=[f[1] for f in fetched]
+##        yyy2=[f[2] for f in fetched]
+##
+##        self.dlg2.ui.matplot1.canvas.ax1.cla()
+##        self.dlg2.ui.matplot1.canvas.ax2.cla()
+##        self.dlg2.ui.matplot1.canvas.ax1.vlines(dates,0,yyy1,lw=5,rasterized=True)
+##        #self.dlg2.ui.matplot1.canvas.ax1.bar(self.dates,self.oy1)
+##        self.dlg2.ui.matplot1.canvas.ax1.xaxis_date()
+##        self.dlg2.ui.matplot1.canvas.ax2.vlines(dates,0,yyy2,lw=5,rasterized=True)
+##        #self.dlg2.ui.matplot1.canvas.ax2.bar(self.dates,self.oy1)
+##        self.dlg2.ui.matplot1.canvas.ax2.xaxis_date()
+##        self.dlg2.ui.matplot1.canvas.fig.autofmt_xdate()
+##        self.dlg2.ui.matplot1.canvas.draw()
+##
+##    def chmat1(self):
+##        cur=self.connectionObject.cursor()
+##        qu="""select utc,"""+self.dlg2.ui.mat1Combo.currentText()+""" from nmea"""
+####        QMessageBox.information(self.iface.mainWindow(), 'inff', qu)
+##        cur.execute(str(qu))
+##        fetched=cur.fetchall()
+##        dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
+##        yy=[f[1] for f in fetched]
+##
+##        self.dlg2.ui.matplot1.canvas.ax1.cla()
+##        self.dlg2.ui.matplot1.canvas.ax1.vlines(dates,0,yy,lw=5,rasterized=True)
+##        #self.dlg2.ui.matplot1.canvas.ax1.xaxis_date()
+##        self.dlg2.ui.matplot1.canvas.ax1.grid(True)
+##        self.dlg2.ui.matplot1.canvas.fig.autofmt_xdate()
+##        self.dlg2.ui.matplot1.canvas.draw()
+##
+##    def chmat2(self):
+##        cur=self.connectionObject.cursor()
+##        qu="""select utc,"""+self.dlg2.ui.mat2Combo.currentText()+""" from nmea"""
+##        cur.execute(str(qu))
+##        fetched=cur.fetchall()
+##        dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
+##        yy=[f[1] for f in fetched]
+####        if self.dlg2.ui.mat2Combo.currentText()=="datastatus":
+####            QMessageBox.information(self.iface.mainWindow(), 'info', "datastatus")
+####            zz=[]
+####            for stauts in yy:
+####                if stauts=="A": zz.append(1)
+####                else:   zz.append(0)
+####            yy=zz
+##        self.dlg2.ui.matplot1.canvas.ax2.cla()
+##        self.dlg2.ui.matplot1.canvas.ax2.vlines(dates,0,yy,lw=5,rasterized=True)
+##        #self.dlg2.ui.matplot1.canvas.ax2.xaxis_date()
+##        self.dlg2.ui.matplot1.canvas.ax2.grid(True)
+##        self.dlg2.ui.matplot1.canvas.fig.autofmt_xdate()
+##        self.dlg2.ui.matplot1.canvas.draw()
 
 
 
