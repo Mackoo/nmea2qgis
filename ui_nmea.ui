@@ -224,7 +224,7 @@
       <attribute name="title">
        <string>SQL</string>
       </attribute>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -817,7 +817,7 @@
              <bool>false</bool>
             </property>
             <property name="maximum">
-             <number>1</number>
+             <number>8</number>
             </property>
            </widget>
           </item>

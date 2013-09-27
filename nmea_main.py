@@ -28,8 +28,8 @@ import resources
 # Import the code for the dialog
 from nmea_dialog import nmea_Dialog,nmea_mainDialog,nmea_settDialog
 import datetime, time,os,string,numpy
-##from pyspatialite import dbapi2 as db #Load PySpatiaLite
-import sqlite3 as db
+from pyspatialite import dbapi2 as db #Load PySpatiaLite
+
 
 
 
@@ -155,54 +155,66 @@ class nmea_main:
 
 
     def nmeaDict(self):
-        nmeafile=open(self.dlg.ui.lineEdit.text())
-        try:
-##            self.connectionObject=db.connect('C:\Users\Maciek\Documents\GIG\magisterka\STD Oszczak\praca_mag\dbnmea.sqlite')
+            nmeafile=open(self.dlg.ui.lineEdit.text())
+##        try:
+##            self.connectionObject=db.connect('C:\Users\Maciek\Documents\GIG\magisterka\programing\dbspatial114.sqlite')
             self.connectionObject=db.connect(':memory:')
             #QMessageBox.critical(self.iface.mainWindow(), 'info', 'connected to database')
-        except:
-            QMessageBox.critical(self.iface.mainWindow(), 'info', 'cannot connect to database')
+            cur=self.connectionObject.cursor()
+            qu="""SELECT InitSpatialMetadata();"""
+            cur.execute(qu)
+            qu="CREATE TABLE nmea(utc datetime primary key, fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus integer);"
+            cur.execute(qu)
+            qu="""SELECT AddGeometryColumn('nmea', 'geom', 4326, 'POINT', 'XY')  """
+            #cur.execute(qu)
 
-        cur=self.connectionObject.cursor()
-        qu="CREATE TABLE nmeaGGA(utcgga datetime primary key, latgga real,longga real, fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus integer)"
-        cur.execute(qu)
-        qu="CREATE TABLE nmeaRMC(utcrmc datetime primary key, latrmc real,lonrmc real,fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus integer)"
-        cur.execute(qu)
-        qu="CREATE TABLE nmeaGLL(utcgll datetime primary key, latgll real,longll real, fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus integer)"
-        cur.execute(qu)
+            cur.execute(qu)
+            self.connectionObject.commit()
 
-        qu="CREATE VIEW nmea23 as  select case when t1.utcgga is null then "
-        qu+="(select case when t2.utcrmc is null then t3.utcgll else t2.utcrmc end)    else t1.utcgga     end as utc   ,case when t1.latgga is null"
-        qu+=" then (select case when t2.latrmc is null then t3.latgll else t2.latrmc end)     else t1.latgga     end as lat ,case when t1.longga is null     then (select case when t2.lonrmc is null then t3.longll else t2.lonrmc end)    else t1.longga     end as lon   , t1.numsv as numsv ,"
-        qu+=" t1.fixstatus as fix  , t1.hdop as hdop , t1.msl as msl , t1.geoid as geoid ,t2.speed  as speed , case when t2.datastatus is null then t3.datastatus else t2.datastatus end as datastatus from nmeaGGA t1 left outer join nmeaRMC t2 on t1.utcgga=t2.utcrmc left outer join nmeaGLL t3 on t3.utcgll=t1.utcgga  union all  select case when t2.utcrmc is null then t3.utcgll    else t2.utcrmc    end as utc   ,case when t2.latrmc is null"
-        qu+=" then  t3.latgll else t2.latrmc end as lat ,case when t2.lonrmc is null     then  t3.longll else t2.lonrmc end    as lon   , t2.numsv as numsv , t2.fixstatus as fix  , t2.hdop as hdop , t2.msl as msl , t2.geoid as geoid ,t2.speed  as speed , case when t2.datastatus is null then t3.datastatus else t2.datastatus end as datastatus from nmeaRMC  t2 left outer join nmeaGGA t1 on t1.utcgga=t2.utcrmc left outer join nmeaGLL t3 on t3.utcgll=t1.utcgga where t1.utcgga is null  union all  select case when t2.utcrmc is null then t3.utcgll    else t2.utcrmc    end as utc   ,case when t2.latrmc is null     then  t3.latgll else t2.latrmc end as lat ,case when t2.lonrmc is null     then  t3.longll else t2.lonrmc end    as lon   , t2.numsv as numsv , t2.fixstatus as fix  , t2.hdop as hdop ,"
-        qu+=" t2.msl as msl , t2.geoid as geoid ,t2.speed  as speed , case when t2.datastatus is null then t3.datastatus else t2.datastatus end as datastatus from nmeaGLL  t3 left outer join nmeaGGA t1 on t1.utcgga=t3.utcgll left outer join nmearmc t2 on t3.utcgll=t2.utcrmc where t1.utcgga is null and t2.utcrmc is null"
-        #QMessageBox.information(self.iface.mainWindow(), "Info", qu)
-        cur.execute(qu)
-        self.connectionObject.commit()
+            for line in nmeafile:
+                linee=line.split(',')
+                if line[3:6]=='GGA' or line[3:6]=='RMC':
+                    cur=self.connectionObject.cursor()
+                    key=linee[1][:2]+':'+linee[1][2:4]+':'+linee[1][4:6]
+                    qu="""insert or ignore into nmea(utc) values('"""+key+"""')"""
 
-
+                    cur.execute(qu)
+            if line[3:6]=='GLL':
+                    cur=self.connectionObject.cursor()
+                    key=linee[5][:2]+':'+linee[5][2:4]+':'+linee[5][4:6]
+                    qu="""insert or ignore into nmea(utc) values('"""+key+"""')"""
+                    cur.execute(qu)
+            self.connectionObject.commit()
 
 
-        nmeafile.seek(0)
-        from funkcje_parse import funkcje
-        funkcje=funkcje()
-        for line in nmeafile:
-            if line[3:6]=='GGA' or line[3:6]=='RMC'or line[3:6]=='GLL':
-                try:
-                    parser={'GGA':funkcje.par_gga,'RMC':funkcje.par_rmc,'GLL':funkcje.par_gll}[line[3:6]]
-                    query=parser(line)
-                    #QMessageBox.information(self.iface.mainWindow(), 'info', query)
-                    cursor=self.connectionObject.cursor()
-                    cursor.execute(query)
-                except:
-                    #QMessageBox.critical(self.iface.mainWindow(), 'error', line)
-                    continue
 
-        self.connectionObject.commit()
+            nmeafile.seek(0)
+            from funkcje_parse import funkcje
+            funkcje=funkcje()
+            for line in nmeafile:
+                if line[3:6]=='GGA' or line[3:6]=='RMC'or line[3:6]=='GLL':
+##                    try:
+                        parser={'GGA':funkcje.par_gga,'RMC':funkcje.par_rmc,'GLL':funkcje.par_gll}[line[3:6]]
+                        query=parser(line)
+                        #QMessageBox.information(self.iface.mainWindow(), 'info', query)
+                        cursor=self.connectionObject.cursor()
+##                        QMessageBox.critical(self.iface.mainWindow(), 'info', line)
+##                        QMessageBox.critical(self.iface.mainWindow(), 'info', query)
+                        cursor.execute(query)
 
-        nmeafile.close()
-        self.dlg.close()
+##                    except:
+##                        #QMessageBox.critical(self.iface.mainWindow(), 'error', line)
+##                        continue
+
+            self.connectionObject.commit()
+
+            nmeafile.close()
+            self.dlg.close()
+
+##        except:
+            #QMessageBox.critical(self.iface.mainWindow(), 'info', 'cannot connect to database')
+
+
 
     def addSave(self):
 
@@ -211,20 +223,12 @@ class nmea_main:
         self.epsg4326.createFromString("epsg:4326")
         nmealayer = QgsVectorLayer("Point?crs=epsg:4326", "nmealeayer", "memory")
         nmealayer.startEditing()
-        qu="""SELECT lat,lon"""
+
+        qu="""SELECT st_x(geom),st_y(geom)"""
         pr = nmealayer.dataProvider()
         att=[]
         a=0
-        if self.dlg3.ui.latCheck.isChecked():
-               pr.addAttributes( [ QgsField("latitude", QVariant.Double)] )
-               fields[a]=QgsField("latitude", QVariant.Double)
-               qu+=',lat'
-               a+=1
-        if self.dlg3.ui.lonCheck.isChecked():
-               pr.addAttributes( [ QgsField("longitude", QVariant.Double)] )
-               fields[a]=QgsField("longitude", QVariant.Double)
-               qu+=',lon'
-               a+=1
+
         if self.dlg3.ui.utcCheck.isChecked():
                pr.addAttributes( [ QgsField("utc", QVariant.String)] )
 ##               att.append(self.utc)
@@ -273,16 +277,31 @@ class nmea_main:
                fields[a]=QgsField("datastatus", QVariant.Double)
                qu+=',datastatus'
                a+=1
+        if self.dlg3.ui.latCheck.isChecked():
+               pr.addAttributes( [ QgsField("latitude", QVariant.Double)] )
+               fields[a]=QgsField("latitude", QVariant.Double)
+               qu+=',st_y(st_transform(geom,2180))'
+               a+=1
+        if self.dlg3.ui.lonCheck.isChecked():
+                pr.addAttributes( [ QgsField("longitude", QVariant.Double)] )
+##            if self.dlg3.ui.latCheck.isChecked():
+##               fields[a+1]=QgsField("longitude", QVariant.Double)
+##            else:
+
+                fields[a]=QgsField("longitude", QVariant.Double)
+                qu+=',st_x(st_transform(geom,2180))'
+                a+=1
+
 
         cur=self.connectionObject.cursor()
-        qu=qu+""" FROM nmea23 """
+        qu=qu+""" FROM nmea """
 
         uii=self.dlg2.ui
 
         if uii.sqlCheck.isChecked():
             qu=qu+""" where 1"""
             if uii.utcCheck.isChecked():
-                qu=qu+""" and utc between """+ str(uii.spinBox_10.value())+""":"""+str(uii.spinBox_11.value())+""":"""+str(uii.spinBox_12.value())+""" and """+ str(uii.spinBox_13.value())+""":"""+str(uii.spinBox_14.value())+""":"""+str(uii.spinBox_15.value())
+                qu=qu+""" and utc between '"""+ str(uii.spinBox_10.value())+""":"""+str(uii.spinBox_11.value())+""":"""+str(uii.spinBox_12.value())+"""' and '"""+ str(uii.spinBox_13.value())+""":"""+str(uii.spinBox_14.value())+""":"""+str(uii.spinBox_15.value())+"""' """
             if uii.numsvCheck1.isChecked():
                 qu=qu+""" and numsv= """+ str(uii.spinBox_16.value())
             if uii.hdopCheck1.isChecked():
@@ -317,13 +336,39 @@ class nmea_main:
         cur.execute(qu)
         fetched=cur.fetchall()
 
+##        prolat=[]
+##        prolon=[]
+##        if self.dlg3.ui.latCheck.isChecked() or self.dlg3.ui.lonCheck.isChecked():
+##
+##            for f in fetched:
+##                crsSrc = QgsCoordinateReferenceSystem(4326)    # WGS 84
+##                crsDest = QgsCoordinateReferenceSystem(2180)  # WGS 84 / PL92
+##                xform = QgsCoordinateTransform(crsSrc, crsDest)
+##
+##                # forward transformation: src -> dest
+##                pt1 = xform.transform(QgsPoint(f[1],f[0]))
+##                #QMessageBox.information(self.iface.mainWindow(), 'info', pt1)
+##                prolat.append(pt1.x())
+##                prolon.append(pt1.y())
+
+
+
+
         fett=[]
+##        ii=0
         for f in fetched:
             fet = QgsFeature()
-            fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(f[1],f[0])))
+            fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(f[0],f[1])))
             for i in range(a):
                 fet.addAttribute(i,QVariant(f[i+2]))
+
+##            if self.dlg3.ui.latCheck.isChecked():
+##                fet.addAttribute(a,QVariant(prolat[ii]))
+##
+##            if self.dlg3.ui.lonCheck.isChecked():
+##                fet.addAttribute(a+1,QVariant(prolon[ii]))
             fett.append(fet)
+##            ii+=1
 
         if self.dlg3.ui.saveCheck.isChecked():
             self.filename = self.fd.getSaveFileName()
@@ -346,7 +391,7 @@ class nmea_main:
 
     def populateSql(self):
 
-        query="""select min(utc),max(utc),min(numsv),max(numsv),min(hdop),max(hdop),min(msl),max(msl),min(geoid),max(geoid),min(speed),max(speed) from nmea23"""
+        query="""select min(utc),max(utc),min(numsv),max(numsv),min(hdop),max(hdop),min(msl),max(msl),min(geoid),max(geoid),min(speed),max(speed) from nmea"""
 
         cursor=self.connectionObject.cursor()
         cursor.execute(query)
@@ -617,7 +662,7 @@ class nmea_main:
 
     def plotmat(self,data,data2):
         cur=self.connectionObject.cursor()
-        qu1="""select utc,"""+data+""","""+data2+""" from nmea23"""
+        qu1="""select utc,"""+data+""","""+data2+""" from nmea"""
         #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
         cur.execute(str(qu1))
         fetched=cur.fetchall()
@@ -638,7 +683,7 @@ class nmea_main:
 
     def chmat1(self):
         cur=self.connectionObject.cursor()
-        qu="""select utc,"""+self.dlg2.ui.mat1Combo.currentText()+""" from nmea23"""
+        qu="""select utc,"""+self.dlg2.ui.mat1Combo.currentText()+""" from nmea"""
 ##        QMessageBox.information(self.iface.mainWindow(), 'inff', qu)
         cur.execute(str(qu))
         fetched=cur.fetchall()
@@ -654,7 +699,7 @@ class nmea_main:
 
     def chmat2(self):
         cur=self.connectionObject.cursor()
-        qu="""select utc,"""+self.dlg2.ui.mat2Combo.currentText()+""" from nmea23"""
+        qu="""select utc,"""+self.dlg2.ui.mat2Combo.currentText()+""" from nmea"""
         cur.execute(str(qu))
         fetched=cur.fetchall()
         dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
