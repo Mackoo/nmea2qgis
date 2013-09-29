@@ -5,6 +5,7 @@ class funkcje:
         data=line.split(',')
 
         utc=data[1][:2]+':'+data[1][2:4]+':'+data[1][4:6]
+
         if data[3]=='N':
             latt=float(data[2][:2])+float(data[2][2:])/60
         elif data[3]=='S':
@@ -13,6 +14,7 @@ class funkcje:
             latt=0
         else:
             latt=0
+
         ind=string.find(data[4],".")
         if data[5]=='E':
             lonn=float(data[4][:(ind-2)])+float(data[4][(ind-2):])/60
@@ -23,8 +25,16 @@ class funkcje:
         else:
             lonn=0
 
-        numsv=data[7]
-        hdop=data[8]
+        if data[7]=='':
+            numsv=0
+        else:
+            numsv=data[7]
+
+        if data[8]=='':
+            hdop=0
+        else:
+            hdop=data[8]
+
         if data[9]=='':
             msl=0
         else:
@@ -33,7 +43,12 @@ class funkcje:
             geoid=0
         else:
             geoid=data[11]
-        fixstatus=data[6]
+
+        if data[6]=='':
+            fixstatus=0
+        else:
+            fixstatus=data[6]
+
         #query="""insert into nmeaGGA(utcgga,latgga,longga,fixstatus,numsv,hdop,msl,geoid) values('"""+str(utc)+"""',"""+str(latt)+""","""+str(lonn)+""","""+str(fixstatus)+""","""+str(numsv)+""","""+str(hdop)+""","""+str(msl)+""","""+str(geoid)+""");"""
         query="""update nmea set fixstatus="""+str(fixstatus)+""",numsv="""+str(numsv)+""",hdop="""+str(hdop)+""",msl="""+str(msl)+""",geoid="""+str(geoid)+""",geom=GeomFromText('POINT("""+str(lonn)+""" """+str(latt)+""")',4326)"""+""" where utc='"""+utc+"""';"""
         return query
@@ -53,6 +68,7 @@ class funkcje:
             latt=0
         else:
             latt=0
+
         ind=string.find(data[5],".")
         if data[6]=='E':
             lonn=float(data[5][:(ind-2)])+float(data[5][(ind-2):])/60
@@ -62,6 +78,7 @@ class funkcje:
             lonn=0
         else:
             lonn=0
+
         if data[7]=='':
             speed=0
         else:

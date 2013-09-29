@@ -37,8 +37,8 @@ class nmea_Dialog(QtGui.QDialog):
 
 
 
-        self.plot1 = Qwt.QwtPlot(self)
-        self.plot2 = Qwt.QwtPlot(self)
+        self.plot1 = Qwt.QwtPlot()
+        self.plot2 = Qwt.QwtPlot()
         self.plot1.plotLayout().setCanvasMargin(0)
         self.plot1.plotLayout().setAlignCanvasToScales(True)
         self.plot2.plotLayout().setCanvasMargin(0)

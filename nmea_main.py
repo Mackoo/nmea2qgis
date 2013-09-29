@@ -86,8 +86,10 @@ class nmea_main:
         # Add toolbar button and menu item
         self.iface.addToolBarIcon(self.action)
         self.iface.addPluginToMenu(u"&nmea2qgis", self.action)
-        self.fd = QFileDialog()
+        self.fd = QFileDialog(None,"","","*.nmea")
         self.fd1 = QFileDialog()
+        self.fd.setNameFilter("*.nmea")
+        self.fd.setFilter("*.nmea")
         settings=QSettings()
         dir=settings.value('/nmea2qgis/dir', QVariant('C:\Users')).toString()
         #self.fd.setDirectory("C:\Users\Maciek\Documents\GIG\magisterka\STD Oszczak\praca_mag")
@@ -103,14 +105,25 @@ class nmea_main:
         self.dlg.show()
         result=self.dlg.exec_()
 
+##    def dialog(self):
+##        self.filename = self.fd.getOpenFileName()
+##        from os.path import isfile
+##        if isfile(self.filename):
+##            self.dlg.ui.lineEdit.setText(self.filename)
+##            settings=QSettings()
+##            settings.setValue('/nmea2qgis/dir',QVariant(self.filename))
+##            self.fd.setDirectory(os.path.dirname(str(self.filename)))
+
     def dialog(self):
-        self.filename = self.fd.getOpenFileName()
-        from os.path import isfile
-        if isfile(self.filename):
-            self.dlg.ui.lineEdit.setText(self.filename)
-            settings=QSettings()
-            settings.setValue('/nmea2qgis/dir',QVariant(self.filename))
-            self.fd.setDirectory(os.path.dirname(str(self.filename)))
+
+        self.filenames = self.fd.getOpenFileNames(None,"","","ALL (*.*);;NMEA (*.nmea)")
+##        from os.path import isfile
+##        if isfile(self.filename):
+        if len(self.filenames)<>0:
+            self.dlg.ui.lineEdit.setText(self.filenames[0])
+##            settings=QSettings()
+##            settings.setValue('/nmea2qgis/dir',QVariant(self.filename))
+##            self.fd.setDirectory(os.path.dirname(str(self.filename)))
 
 
     def exit(self):
@@ -140,7 +153,7 @@ class nmea_main:
         self.dlg2.ui.nmeaBrowser.setDocument(nmeadoc)
         self.lines = unicode(self.dlg2.ui.nmeaBrowser.toPlainText()).split('\n')
 
-        self.nmeaDict()
+        self.nmeaDict(open(self.dlg.ui.lineEdit.text()))
 
         self.plotmat(self.dlg2.ui.mat1Combo.currentText(),self.dlg2.ui.mat2Combo.currentText())
         self.whereSet()
@@ -151,16 +164,47 @@ class nmea_main:
 
 
     def addLayer(self):
+##        self.connectionObject=db.connect(':memory:')
+##        self.connectionObject=db.connect('C:\Users\Maciek\Documents\GIG\magisterka\programing\dbspatial114.sqlite')
 
-        self.nmeaDict()
-        self.addSave()
+        for filee in self.filenames:
+            try:
+##                dictt=thtread(open(filee))
+##                tree=thtread2()
+##                QObject.connect( dictt, SIGNAL('finished()'), self.mess )
+##                QObject.connect( dictt, SIGNAL("update(QString)"), self.mess2 )
+##                QObject.connect( tree, SIGNAL('finished()'), self.mess )
+##                QObject.connect( tree, SIGNAL("update(QString)"), self.mess2 )
+##                tree.start()
+##                tree.wait()
+##                dictt.start()
+##                QCoreApplication.processEvents()
+                #dictt.wait()
+                self.nmeaDict(open(filee))
+                self.addSave(filee)
+
+
+        #self.dlg3.show()
+            except:
+                QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file   "+filee)
+
+        self.dlg.close()
+
+    def mess(self):
+        QMessageBox.information(self.iface.mainWindow(),"inff","koniec watku")
+        self.dlg3.close()
+
+    def mess2(self,text):
+        QMessageBox.information(self.iface.mainWindow(),"inff",str(text))
+
 
     def addLayer2(self):
         self.dlg3.exec_()
-        self.addSave()
+        self.addSave(self.dlg.ui.lineEdit.text())
 
-    def nmeaDict(self):
-            nmeafile=open(self.dlg.ui.lineEdit.text())
+    def nmeaDict(self,filee):
+            nmeafile=filee
+##            nmeafile=open(self.dlg.ui.lineEdit.text())
 ##        try:
 ##            self.connectionObject=db.connect('C:\Users\Maciek\Documents\GIG\magisterka\programing\dbspatial114.sqlite')
             self.connectionObject=db.connect(':memory:')
@@ -168,7 +212,7 @@ class nmea_main:
             cur=self.connectionObject.cursor()
             qu="""SELECT InitSpatialMetadata();"""
             cur.execute(qu)
-            qu="CREATE TABLE nmea(utc datetime primary key, fixstatus integer, numsv integer, hdop real, msl real, geoid real, speed real, datastatus integer);"
+            qu="CREATE TABLE nmea(utc datetime primary key, fixstatus integer default 0, numsv integer default 0, hdop real default 0, msl real default 0, geoid real default 0, speed real default 0, datastatus integer default 0);"
             cur.execute(qu)
             qu="""SELECT AddGeometryColumn('nmea', 'geom', 4326, 'POINT', 'XY')  """
             #cur.execute(qu)
@@ -184,7 +228,7 @@ class nmea_main:
                     qu="""insert or ignore into nmea(utc) values('"""+key+"""')"""
 
                     cur.execute(qu)
-            if line[3:6]=='GLL':
+                if line[3:6]=='GLL':
                     cur=self.connectionObject.cursor()
                     key=linee[5][:2]+':'+linee[5][2:4]+':'+linee[5][4:6]
                     qu="""insert or ignore into nmea(utc) values('"""+key+"""')"""
@@ -221,12 +265,15 @@ class nmea_main:
 
 
 
-    def addSave(self):
-
+    def addSave(self,path):
+        try:
+            layername=path.split("\\")[-1]
+        except:
+            layername="nmealayer"
         fields = {}
         self.epsg4326= QgsCoordinateReferenceSystem()
         self.epsg4326.createFromString("epsg:4326")
-        nmealayer = QgsVectorLayer("Point?crs=epsg:4326", "nmealeayer", "memory")
+        nmealayer = QgsVectorLayer("Point?crs=epsg:4326", layername, "memory")
         nmealayer.startEditing()
 
         qu="""SELECT st_x(geom),st_y(geom)"""
@@ -336,7 +383,7 @@ class nmea_main:
 
 
         #qu=qu+str(self.dlg2.ui.sqlText.toPlainText())
-        QMessageBox.information(self.iface.mainWindow(),"info",qu)
+        #QMessageBox.information(self.iface.mainWindow(),"info",qu)
 
         cur.execute(qu)
         fetched=cur.fetchall()
@@ -375,16 +422,21 @@ class nmea_main:
             fett.append(fet)
 ##            ii+=1
 
-        if self.dlg3.ui.saveCheck.isChecked():
-            self.filename = self.fd.getSaveFileName()
-            writer = QgsVectorFileWriter(self.filename, "CP1250", fields, QGis.WKBPoint, self.epsg4326, "ESRI Shapefile")
-            for fet in fett:
-                writer.addFeature(fet)
-            del writer
+##        if self.dlg3.ui.saveCheck.isChecked():
+##            self.filename = self.fd.getSaveFileName()
+##            writer = QgsVectorFileWriter(self.filename, "CP1250", fields, QGis.WKBPoint, self.epsg4326, "ESRI Shapefile")
+##            for fet in fett:
+##                writer.addFeature(fet)
+##            del writer
 
         pr.addFeatures(fett)
         nmealayer.commitChanges()
         nmealayer.updateExtents()
+
+        if self.dlg3.ui.saveCheck.isChecked():
+            self.filename = self.fd.getSaveFileName()
+            writer=QgsVectorFileWriter.writeAsVectorFormat(nmealayer,self.filename,"CP1250",  self.epsg4326, "ESRI Shapefile")
+
         QgsMapLayerRegistry.instance().addMapLayer(nmealayer)
 
         self.iface.mapCanvas().zoomToFullExtent()
@@ -833,3 +885,102 @@ class nmea_main:
                     nmeacurr.insertText(linee+'\n')
 
         self.dlg2.ui.nmeaBrowser.setDocument(nmeadocc)
+
+
+
+class thtread(QThread):
+    def __init__(self,filee):
+        QThread.__init__(self)
+
+        self.nmeafile=filee
+##        self.connectionObjectt=cconnectionObject
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+
+        self.connectionObject=db.connect('C:\Users\Maciek\Documents\GIG\magisterka\programing\dbspatial114.sqlite')
+        nmeafile=self.nmeafile
+##            nmeafile=open(self.dlg.ui.lineEdit.text())
+##        try:
+##            self.connectionObject=db.connect('C:\Users\Maciek\Documents\GIG\magisterka\programing\dbspatial114.sqlite')
+
+##        self.connectionObject=self.connectionObjectt
+        #QMessageBox.critical(self.iface.mainWindow(), 'info', 'connected to database')
+
+        cur=self.connectionObject.cursor()
+
+
+
+        qu="""SELECT InitSpatialMetadata();"""
+        cur.execute(qu)
+        qu="CREATE TABLE nmea(utc datetime primary key, fixstatus integer default 0, numsv integer default 0, hdop real default 0, msl real default 0, geoid real default 0, speed real default 0, datastatus integer default 0);"
+        cur.execute(qu)
+        qu="""SELECT AddGeometryColumn('nmea', 'geom', 4326, 'POINT', 'XY')  """
+##
+##
+
+        cur.execute(qu)
+        self.connectionObject.commit()
+
+        for line in nmeafile:
+            linee=line.split(',')
+            if line[3:6]=='GGA' or line[3:6]=='RMC':
+                cur=self.connectionObject.cursor()
+                key=linee[1][:2]+':'+linee[1][2:4]+':'+linee[1][4:6]
+                qu="""insert or ignore into nmea(utc) values('"""+key+"""')"""
+
+                cur.execute(qu)
+            if line[3:6]=='GLL':
+                cur=self.connectionObject.cursor()
+                key=linee[5][:2]+':'+linee[5][2:4]+':'+linee[5][4:6]
+                qu="""insert or ignore into nmea(utc) values('"""+key+"""')"""
+                cur.execute(qu)
+        self.connectionObject.commit()
+
+
+
+        nmeafile.seek(0)
+        from funkcje_parse import funkcje
+        funkcje=funkcje()
+        for line in nmeafile:
+            if line[3:6]=='GGA' or line[3:6]=='RMC'or line[3:6]=='GLL':
+##                    try:
+                    parser={'GGA':funkcje.par_gga,'RMC':funkcje.par_rmc,'GLL':funkcje.par_gll}[line[3:6]]
+                    query=parser(line)
+                    #QMessageBox.information(self.iface.mainWindow(), 'info', query)
+                    cursor=self.connectionObject.cursor()
+##                        QMessageBox.critical(self.iface.mainWindow(), 'info', line)
+##                        QMessageBox.critical(self.iface.mainWindow(), 'info', query)
+                    cursor.execute(query)
+
+##                    except:
+##                        #QMessageBox.critical(self.iface.mainWindow(), 'error', line)
+##                        continue
+
+        self.connectionObject.commit()
+
+        nmeafile.close()
+        #self.terminate()
+
+        self.emit(SIGNAL('update(QString)'), "from work thread 1222222" )
+        return
+        #self.dlg.close()
+
+##        except:
+class thtread2(QThread):
+    def __init__(self):
+            QThread.__init__(self)
+
+    def __del__(self):
+            self.wait()
+
+    def run(self):
+        QCoreApplication.processEvents()
+##          for i in range(6):
+##            time.sleep(0.3) # artificial time delay
+        time.sleep(0.3)
+        self.emit(SIGNAL('update(QString)'), "from work thread " + str(1) )
+        return
+        #self.emit(SIGNAL('update(QString)'), "from work thread " )
