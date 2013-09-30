@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_settings.ui'
 #
-# Created: Sun Sep 22 19:52:13 2013
+# Created: Sun Sep 29 22:13:22 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -105,6 +105,14 @@ class Ui_Dialog(object):
         self.saveCheck.setSizePolicy(sizePolicy)
         self.saveCheck.setObjectName(_fromUtf8("saveCheck"))
         self.horizontalLayout_2.addWidget(self.saveCheck)
+        self.label_2 = QtGui.QLabel(Dialog)
+        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.horizontalLayout_2.addWidget(self.label_2)
+        self.epsgSpin = QtGui.QSpinBox(Dialog)
+        self.epsgSpin.setMaximum(9999)
+        self.epsgSpin.setProperty("value", 2180)
+        self.epsgSpin.setObjectName(_fromUtf8("epsgSpin"))
+        self.horizontalLayout_2.addWidget(self.epsgSpin)
         self.buttonBox = QtGui.QDialogButtonBox(Dialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -134,4 +142,5 @@ class Ui_Dialog(object):
         self.geoidCheck.setText(_translate("Dialog", "geoid", None))
         self.speedCheck.setText(_translate("Dialog", "speed", None))
         self.saveCheck.setText(_translate("Dialog", "Save on disk", None))
+        self.label_2.setText(_translate("Dialog", "EPSG code for lon/lat attributes", None))
 

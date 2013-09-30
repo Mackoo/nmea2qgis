@@ -341,7 +341,7 @@ class nmea_main:
 ##            else:
 
                 fields[a]=QgsField("longitude", QVariant.Double)
-                qu+=',st_x(st_transform(geom,2180))'
+                qu+=""",st_x(st_transform(geom,"""+str(self.dlg3.ui.epsgSpin.value())+"""))"""
                 a+=1
 
 
