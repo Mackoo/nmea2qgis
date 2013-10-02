@@ -321,7 +321,7 @@ class nmea_main:
                pr.addAttributes( [ QgsField("fixstatus", QVariant.Double)] )
 ##               att.append(self.fixstatus)
                fields[a]=QgsField("fixstatus", QVariant.Double)
-               qu+=',fix'
+               qu+=',fixstatus '
                a+=1
         if self.dlg3.ui.datastatusCheck.isChecked():
                pr.addAttributes( [ QgsField("datastatus", QVariant.Double)] )
@@ -367,7 +367,7 @@ class nmea_main:
             if uii.datastatusCheck1.isChecked():
                 qu=qu+""" and datastatus= """+ str(uii.spinBox_19.value())
             if uii.fixstatusCheck1.isChecked():
-                qu=qu+""" and fix= """+ str(uii.spinBox_20.value())
+                qu=qu+""" and fixstatus= """+ str(uii.spinBox_20.value())
 
             if uii.numsvCheck2.isChecked():
                 qu=qu+""" and numsv between """+ str(uii.spinBox_17.value())+""" and """+str(uii.spinBox_18.value())
@@ -379,6 +379,8 @@ class nmea_main:
                 qu=qu+""" and geoid between """+str(+uii.doubleSpinBox_8.value())+""" and """+str(uii.doubleSpinBox_9.value())
             if uii.speedCheck2.isChecked():
                 qu=qu+""" and speed between """+str(uii.doubleSpinBox_11.value())+""" and """+str(uii.doubleSpinBox_12.value())
+            if uii.fixstatusCheck2.isChecked():
+                qu=qu+""" and fixstatus between """+str(uii.spinBox_21.value())+""" and """+str(uii.spinBox_22.value())
 
 
 
@@ -534,11 +536,13 @@ class nmea_main:
             uii.datastatusCheck1.setEnabled(True)
             uii.fixstatusCheck1.setEnabled(True)
 
+
             uii.numsvCheck2.setEnabled(True)
             uii.hdopCheck2.setEnabled(True)
             uii.mslCheck2.setEnabled(True)
             uii.geoidCheck2.setEnabled(True)
             uii.speedCheck2.setEnabled(True)
+            uii.fixstatusCheck2.setEnabled(True)
 
             QObject.connect(uii.utcCheck,SIGNAL("stateChanged(int)"), self.utcCheck)
             QObject.connect(uii.numsvCheck1,SIGNAL("stateChanged(int)"), self.numsvCheck1)
@@ -554,6 +558,7 @@ class nmea_main:
             QObject.connect(uii.mslCheck2,SIGNAL("stateChanged(int)"), self.mslCheck2)
             QObject.connect(uii.geoidCheck2,SIGNAL("stateChanged(int)"), self.geoidCheck2)
             QObject.connect(uii.speedCheck2,SIGNAL("stateChanged(int)"), self.speedCheck2)
+            QObject.connect(uii.fixstatusCheck2,SIGNAL("stateChanged(int)"), self.fixstatusCheck2)
 
 
         else:
@@ -572,6 +577,7 @@ class nmea_main:
             uii.geoidCheck2.setEnabled(False)
             uii.speedCheck2.setEnabled(False)
 
+
             uii.utcCheck.setChecked(False)
             uii.numsvCheck1.setChecked(False)
             uii.hdopCheck1.setChecked(False)
@@ -586,6 +592,7 @@ class nmea_main:
             uii.mslCheck2.setChecked(False)
             uii.geoidCheck2.setChecked(False)
             uii.speedCheck2.setChecked(False)
+            uii.fixstatusCheck2.setEnabled(False)
 
     def utcCheck(self):
         uii=self.dlg2.ui
@@ -656,10 +663,22 @@ class nmea_main:
     def fixstatusCheck1(self):
         uii=self.dlg2.ui
         if uii.fixstatusCheck1.isChecked():
+            uii.fixstatusCheck2.setChecked(False)
             uii.spinBox_20.setEnabled(True)
 
         else:
             uii.spinBox_20.setEnabled(False)
+
+    def fixstatusCheck2(self):
+        uii=self.dlg2.ui
+        if uii.fixstatusCheck2.isChecked():
+            uii.fixstatusCheck1.setChecked(False)
+            uii.spinBox_21.setEnabled(True)
+            uii.spinBox_22.setEnabled(True)
+
+        else:
+            uii.spinBox_21.setEnabled(False)
+            uii.spinBox_22.setEnabled(False)
 
     def numsvCheck2(self):
         uii=self.dlg2.ui
