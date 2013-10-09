@@ -898,27 +898,6 @@
        </property>
       </widget>
      </widget>
-     <widget class="QWidget" name="tab_4">
-      <attribute name="title">
-       <string>Strona</string>
-      </attribute>
-      <widget class="QFrame" name="frame">
-       <property name="geometry">
-        <rect>
-         <x>370</x>
-         <y>290</y>
-         <width>341</width>
-         <height>271</height>
-        </rect>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-      </widget>
-     </widget>
     </widget>
    </item>
   </layout>

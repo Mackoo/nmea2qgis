@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_nmea.ui'
 #
-# Created: Wed Oct 02 19:09:38 2013
+# Created: Sun Oct 06 12:19:30 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -405,14 +405,6 @@ class Ui_nmea(object):
         self.resetBut.setGeometry(QtCore.QRect(20, 460, 75, 23))
         self.resetBut.setObjectName(_fromUtf8("resetBut"))
         self.tabWidget.addTab(self.tab_3, _fromUtf8(""))
-        self.tab_4 = QtGui.QWidget()
-        self.tab_4.setObjectName(_fromUtf8("tab_4"))
-        self.frame = QtGui.QFrame(self.tab_4)
-        self.frame.setGeometry(QtCore.QRect(370, 290, 341, 271))
-        self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
-        self.frame.setFrameShadow(QtGui.QFrame.Raised)
-        self.frame.setObjectName(_fromUtf8("frame"))
-        self.tabWidget.addTab(self.tab_4, _fromUtf8(""))
         self.verticalLayout.addWidget(self.tabWidget)
 
         self.retranslateUi(nmea)
@@ -470,5 +462,4 @@ class Ui_nmea(object):
         self.datastatusCheck1.setText(_translate("nmea", "datastatus equals:", None))
         self.resetBut.setText(_translate("nmea", "RESET", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("nmea", "SQL", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("nmea", "Strona", None))
 
