@@ -43,7 +43,7 @@ class nmea_main:
         self.plugin_dir = QFileInfo(QgsApplication.qgisUserDbFilePath()).path() + "/python/plugins/nmea2dbqgis"
         # initialize locale
         localePath = ""
-        locale = QSettings().value("locale/userLocale").toString()[0:2]
+        locale = QSettings().value("locale/userLocale")[0:2]
         if QFileInfo(self.plugin_dir).exists():
             localePath = self.plugin_dir + "/i18n/nmea_main_" + locale + ".qm"
 
@@ -91,7 +91,7 @@ class nmea_main:
         self.fd.setNameFilter("*.nmea")
         self.fd.setFilter("*.nmea")
         settings=QSettings()
-        dir=settings.value('/nmea2qgis/dir', QVariant('C:\Users')).toString()
+        dir=settings.value('/nmea2qgis/dir', 'C:\Users')
         #self.fd.setDirectory("C:\Users\Maciek\Documents\GIG\magisterka\STD Oszczak\praca_mag")
         self.fd.setDirectory(dir)
 
@@ -168,7 +168,7 @@ class nmea_main:
 ##        self.connectionObject=db.connect('C:\Users\Maciek\Documents\GIG\magisterka\programing\dbspatial114.sqlite')
 
         for filee in self.filenames:
-            try:
+##            try:
 ##                dictt=thtread(open(filee))
 ##                tree=thtread2()
 ##                QObject.connect( dictt, SIGNAL('finished()'), self.mess )
@@ -185,8 +185,8 @@ class nmea_main:
 
 
         #self.dlg3.show()
-            except:
-                QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file   "+filee)
+##            except:
+##                QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file   "+filee)
 
         self.dlg.close()
 
@@ -413,8 +413,11 @@ class nmea_main:
         for f in fetched:
             fet = QgsFeature()
             fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(f[0],f[1])))
+            attributes=[]
             for i in range(a):
-                fet.addAttribute(i,QVariant(f[i+2]))
+                attributes.append(f[i+2])
+
+            fet.setAttributes(attributes)
 
 ##            if self.dlg3.ui.latCheck.isChecked():
 ##                fet.addAttribute(a,QVariant(prolat[ii]))
