@@ -756,6 +756,8 @@ class nmea_main:
         dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
 
         #QMessageBox.information(self.iface.mainWindow(), 'inff', str(fetched[1]))
+        datee=[int(f[0][0:2])*3600+int(f[0][3:5])*60+int(f[0][6:8])-3600 for f in fetched]
+
 
         yyy1=[float(f[1]) for f in fetched]
         yyy2=[float(f[2]) for f in fetched]
@@ -766,8 +768,10 @@ class nmea_main:
         pen1.setWidth(2)
         curve1 = Qwt.QwtPlotCurve('aaaa')
 
+
         curve1.setPen(pen1)
-        curve1.setData(range(len(yyy1)), yyy1)
+        #curve1.setData(range(len(yyy1)), yyy1)
+        curve1.setData(datee, yyy1)
 
         color2 = QColor('red')
         pen2 = QPen(color2)
@@ -775,12 +779,13 @@ class nmea_main:
         curve2 = Qwt.QwtPlotCurve('bbbb')
 
         curve2.setPen(pen2)
-        curve2.setData(range(len(yyy2)), yyy2)
+        curve2.setData(datee, yyy2)
 
 ##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
-
+        self.dlg2.plot1.setAxisScaleDraw( Qwt.Qwt.QwtPlot.xBottom, DateTimeScaleDraw() )
         curve1.attach(self.dlg2.plot1)
         self.dlg2.plot1.replot()
+        self.dlg2.plot2.setAxisScaleDraw( Qwt.Qwt.QwtPlot.xBottom, DateTimeScaleDraw() )
         curve2.attach(self.dlg2.plot2)
         self.dlg2.plot2.replot()
         #self.dlg2.plot.(Qwt.Curve(x, cos(x), Pen(Magenta,2),))
@@ -793,6 +798,7 @@ class nmea_main:
         #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
         cur.execute(str(qu1))
         fetched=cur.fetchall()
+        datee=[int(f[0][0:2])*3600+int(f[0][3:5])*60+int(f[0][6:8])-3600 for f in fetched]
         yyy1=[float(f[1]) for f in fetched]
 
         color = QColor('limegreen')
@@ -800,7 +806,7 @@ class nmea_main:
         pen = QPen(color)
         pen.setWidth(2)
         curve.setPen(pen)
-        curve.setData(range(len(yyy1)), yyy1)
+        curve.setData(datee, yyy1)
 
 ##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
 
@@ -814,6 +820,7 @@ class nmea_main:
         #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
         cur.execute(str(qu1))
         fetched=cur.fetchall()
+        datee=[int(f[0][0:2])*3600+int(f[0][3:5])*60+int(f[0][6:8])-3600 for f in fetched]
         yyy1=[float(f[1]) for f in fetched]
 
         color = QColor('red')
@@ -821,7 +828,7 @@ class nmea_main:
         pen = QPen(color)
         pen.setWidth(2)
         curve.setPen(pen)
-        curve.setData(range(len(yyy1)), yyy1)
+        curve.setData(datee, yyy1)
 
 ##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
 
@@ -991,6 +998,31 @@ class thtread(QThread):
         #self.dlg.close()
 
 ##        except:
+
+
+
+class DateTimeScaleDraw( Qwt.Qwt.QwtScaleDraw ):
+    '''Class used to draw a datetime axis on our plot.
+    '''
+    def __init__( self, *args ):
+        Qwt.Qwt.QwtScaleDraw.__init__( self, *args )
+
+    def label( self, value ):
+        '''Function used to create the text of each label
+        used to draw the axis.
+        '''
+        try:
+            dt = datetime.datetime.fromtimestamp( value )
+        except:
+            dt = datetime.datetime.fromtimestamp( 0 )
+        #return Qwt5.Qwt.QwtText( '%s' % dt.strftime( '%d/%m%Y %H:%M:%S' ) )
+        return Qwt.Qwt.QwtText( '%s' % dt.strftime( '%H:%M:%S' ) )
+
+
+
+
+
+
 class thtread2(QThread):
     def __init__(self):
             QThread.__init__(self)
