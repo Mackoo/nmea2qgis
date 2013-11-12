@@ -25,7 +25,9 @@ from ui_nmea_main import Ui_nmea_main
 from ui_nmea import Ui_nmea
 from ui_settings import Ui_Dialog
 import PyQt4.Qwt5 as Qwt
+
 # create the dialog for zoom to point
+
 
 
 class nmea_Dialog(QtGui.QDialog):
@@ -35,17 +37,6 @@ class nmea_Dialog(QtGui.QDialog):
         self.ui = Ui_nmea()
         self.ui.setupUi(self)
 
-
-
-        self.plot1 = Qwt.QwtPlot()
-
-        self.plot2 = Qwt.QwtPlot()
-        self.plot1.plotLayout().setCanvasMargin(0)
-        self.plot1.plotLayout().setAlignCanvasToScales(True)
-        self.plot2.plotLayout().setCanvasMargin(0)
-        self.plot2.plotLayout().setAlignCanvasToScales(True)
-        self.ui.verticalLayout_4.addWidget(self.plot1)
-        self.ui.verticalLayout_4.addWidget(self.plot2)
 
 
 ##

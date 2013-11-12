@@ -21,6 +21,7 @@
 """
 # Import the PyQt and QGIS libraries
 from PyQt4.QtCore import *
+from PyQt4 import QtCore
 from PyQt4.QtGui import *
 from qgis.core import *
 # Initialize Qt resources from file resources.py
@@ -30,9 +31,14 @@ from nmea_dialog import nmea_Dialog,nmea_mainDialog,nmea_settDialog
 import datetime, time,os,string,numpy
 from pyspatialite import dbapi2 as db #Load PySpatiaLite
 import PyQt4.Qwt5 as Qwt
+from graphs import mplc
 
 
-
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
 
 class nmea_main:
 
@@ -58,6 +64,12 @@ class nmea_main:
         self.dlg = nmea_mainDialog()
         self.dlg2=nmea_Dialog()
         self.dlg3=nmea_settDialog()
+
+
+
+
+
+
 
         QObject.connect(self.dlg.ui.pushButton,SIGNAL("clicked()"), self.dialog)
         QObject.connect(self.dlg.ui.ButOpenNmea,SIGNAL("clicked()"), self.openNmea)
@@ -94,6 +106,11 @@ class nmea_main:
         dir=settings.value('/nmea2qgis/dir', 'C:\Users')
         #self.fd.setDirectory("C:\Users\Maciek\Documents\GIG\magisterka\STD Oszczak\praca_mag")
         self.fd.setDirectory(dir)
+
+
+
+
+
 
     def unload(self):
         self.iface.removePluginMenu(u"&nmea2qgis", self.action)
@@ -763,55 +780,147 @@ class nmea_main:
         yyy2=[float(f[2]) for f in fetched]
 
 
-        color1 = QColor('limegreen')
-        pen1 = QPen(color1)
-        pen1.setWidth(2)
-        curve1 = Qwt.QwtPlotCurve('aaaa')
 
 
-        curve1.setPen(pen1)
-        #curve1.setData(range(len(yyy1)), yyy1)
-        curve1.setData(datee, yyy1)
 
-        color2 = QColor('red')
-        pen2 = QPen(color2)
-        pen2.setWidth(2)
-        curve2 = Qwt.QwtPlotCurve('bbbb')
 
-        curve2.setPen(pen2)
-        curve2.setData(datee, yyy2)
 
-##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
-        self.dlg2.plot1.setAxisScaleDraw( Qwt.Qwt.QwtPlot.xBottom, DateTimeScaleDraw() )
-        curve1.attach(self.dlg2.plot1)
-        self.dlg2.plot1.replot()
-        self.dlg2.plot2.setAxisScaleDraw( Qwt.Qwt.QwtPlot.xBottom, DateTimeScaleDraw() )
-        curve2.attach(self.dlg2.plot2)
-        self.dlg2.plot2.replot()
+
+        if self.dlg3.ui.qwtCheck.isChecked():
+
+            try:
+##                self.dlg2.ui.verticalLayout_4.removeWidget(self.plot1)
+##                self.dlg2.ui.verticalLayout_4.removeWidget(self.plot2)
+                self.plot1.hide()
+                self.plot2.hide()
+            except:
+                pass
+
+            try:
+                self.matplot1.hide()
+##                self.dlg2.ui.verticalLayout_4.removeWidget(self.matplot1)
+
+            except:
+                pass
+
+            self.plot1 = Qwt.QwtPlot()
+            self.plot2 = Qwt.QwtPlot()
+            self.plot1.plotLayout().setCanvasMargin(0)
+            self.plot1.plotLayout().setAlignCanvasToScales(True)
+            self.plot2.plotLayout().setCanvasMargin(0)
+            self.plot2.plotLayout().setAlignCanvasToScales(True)
+            self.dlg2.ui.verticalLayout_4.addWidget(self.plot1)
+            self.dlg2.ui.verticalLayout_4.addWidget(self.plot2)
+
+
+            color1 = QColor('limegreen')
+            pen1 = QPen(color1)
+            pen1.setWidth(2)
+            curve1 = Qwt.QwtPlotCurve('aaaa')
+            curve1.setPen(pen1)
+            #curve1.setData(range(len(yyy1)), yyy1)
+            curve1.setData(datee, yyy1)
+
+            color2 = QColor('red')
+            pen2 = QPen(color2)
+            pen2.setWidth(2)
+            curve2 = Qwt.QwtPlotCurve('bbbb')
+
+            curve2.setPen(pen2)
+            curve2.setData(datee, yyy2)
+
+    ##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
+            self.plot1.setAxisScaleDraw( Qwt.Qwt.QwtPlot.xBottom, DateTimeScaleDraw() )
+            curve1.attach(self.plot1)
+            self.plot1.replot()
+            self.plot2.setAxisScaleDraw( Qwt.Qwt.QwtPlot.xBottom, DateTimeScaleDraw() )
+            curve2.attach(self.plot2)
+            self.plot2.replot()
         #self.dlg2.plot.(Qwt.Curve(x, cos(x), Pen(Magenta,2),))
 
 
+        else:
+            try:
+##            self.dlg2.ui.verticalLayout_4.removeWidget(self.plot1)
+##            self.dlg2.ui.verticalLayout_4.removeWidget(self.plot2)
+                self.plot1.hide()
+                self.plot2.hide()
+
+            except:
+
+                pass
+
+            try:
+##                self.dlg2.ui.verticalLayout_4.removeWidget(self.matplot1)
+                self.matplot1.hide()
+            except:
+                pass
+
+
+            self.tab_2 = QWidget()
+            self.tab_2.setObjectName(_fromUtf8("tab_2"))
+            self.matplot1 = mplc(self.tab_2)
+            self.matplot1.setObjectName(_fromUtf8("matplot1"))
+            self.dlg2.ui.verticalLayout_4.addWidget(self.matplot1)
+
+
+            self.matplot1.canvas.ax1.cla()
+            self.matplot1.canvas.ax2.cla()
+            self.matplot1.canvas.ax1.vlines(dates,0,yyy1,lw=5,rasterized=True)
+            #self.dlg2.ui.matplot1.canvas.ax1.bar(self.dates,self.oy1)
+            self.matplot1.canvas.ax1.xaxis_date()
+            self.matplot1.canvas.ax2.vlines(dates,0,yyy2,lw=5,rasterized=True)
+            #self.dlg2.ui.matplot1.canvas.ax2.bar(self.dates,self.oy1)
+            self.matplot1.canvas.ax2.xaxis_date()
+            self.matplot1.canvas.fig.autofmt_xdate()
+            self.matplot1.canvas.draw()
+
+
+
+
     def chmat1(self):
-        self.dlg2.plot1.clear()
-        cur=self.connectionObject.cursor()
-        qu1="""select utc,"""+self.dlg2.ui.mat1Combo.currentText()+""" from nmea"""
-        #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
-        cur.execute(str(qu1))
-        fetched=cur.fetchall()
-        datee=[int(f[0][0:2])*3600+int(f[0][3:5])*60+int(f[0][6:8])-3600 for f in fetched]
-        yyy1=[float(f[1]) for f in fetched]
 
-        color = QColor('limegreen')
-        curve = Qwt.QwtPlotCurve('aaaa')
-        pen = QPen(color)
-        pen.setWidth(2)
-        curve.setPen(pen)
-        curve.setData(datee, yyy1)
+        if self.dlg3.ui.qwtCheck.isChecked():
+            self.plot1.clear()
+            cur=self.connectionObject.cursor()
+            qu1="""select utc,"""+self.dlg2.ui.mat1Combo.currentText()+""" from nmea"""
+            #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
+            cur.execute(str(qu1))
+            fetched=cur.fetchall()
+            datee=[int(f[0][0:2])*3600+int(f[0][3:5])*60+int(f[0][6:8])-3600 for f in fetched]
+            yyy1=[float(f[1]) for f in fetched]
 
-##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
+            color = QColor('limegreen')
+            curve = Qwt.QwtPlotCurve('aaaa')
+            pen = QPen(color)
+            pen.setWidth(2)
+            curve.setPen(pen)
+            curve.setData(datee, yyy1)
 
-        curve.attach(self.dlg2.plot1)
-        self.dlg2.plot1.replot()
+    ##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
+
+            curve.attach(self.plot1)
+            self.plot1.replot()
+
+        else:
+            cur=self.connectionObject.cursor()
+            qu="""select utc,"""+self.dlg2.ui.mat1Combo.currentText()+""" from nmea"""
+    ## QMessageBox.information(self.iface.mainWindow(), 'inff', qu)
+            cur.execute(str(qu))
+            fetched=cur.fetchall()
+            dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
+            yy=[f[1] for f in fetched]
+
+            self.matplot1.canvas.ax1.cla()
+            self.matplot1.canvas.ax1.vlines(dates,0,yy,lw=5,rasterized=True)
+            #self.dlg2.ui.matplot1.canvas.ax1.xaxis_date()
+            self.matplot1.canvas.ax1.grid(True)
+            self.matplot1.canvas.fig.autofmt_xdate()
+            self.matplot1.canvas.draw()
+
+
+
+
 
     def chmat2(self):
         self.dlg2.plot2.clear()

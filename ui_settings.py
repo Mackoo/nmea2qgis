@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui_settings.ui'
 #
-# Created: Sun Sep 29 22:13:22 2013
+# Created: Tue Nov 12 21:38:24 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
-        Dialog.resize(393, 256)
+        Dialog.resize(394, 283)
         self.verticalLayout = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label = QtGui.QLabel(Dialog)
@@ -123,6 +123,12 @@ class Ui_Dialog(object):
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.horizontalLayout_2.addWidget(self.buttonBox)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.qwtCheck = QtGui.QCheckBox(Dialog)
+        self.qwtCheck.setObjectName(_fromUtf8("qwtCheck"))
+        self.verticalLayout.addWidget(self.qwtCheck)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(Dialog)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), Dialog.accept)
@@ -143,4 +149,5 @@ class Ui_Dialog(object):
         self.speedCheck.setText(_translate("Dialog", "speed", None))
         self.saveCheck.setText(_translate("Dialog", "Save on disk", None))
         self.label_2.setText(_translate("Dialog", "EPSG code for lon/lat attributes", None))
+        self.qwtCheck.setText(_translate("Dialog", "use QWT", None))
 
