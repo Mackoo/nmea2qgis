@@ -50,7 +50,7 @@ class funkcje:
             fixstatus=data[6]
 
         #query="""insert into nmeaGGA(utcgga,latgga,longga,fixstatus,numsv,hdop,msl,geoid) values('"""+str(utc)+"""',"""+str(latt)+""","""+str(lonn)+""","""+str(fixstatus)+""","""+str(numsv)+""","""+str(hdop)+""","""+str(msl)+""","""+str(geoid)+""");"""
-        query="""update nmea set fixstatus="""+str(fixstatus)+""",numsv="""+str(numsv)+""",hdop="""+str(hdop)+""",msl="""+str(msl)+""",geoid="""+str(geoid)+""",geom=GeomFromText('POINT("""+str(lonn)+""" """+str(latt)+""")',4326)"""+""" where utc='"""+utc+"""';"""
+        query="""update nmea set fix="""+str(fixstatus)+""",numsv="""+str(numsv)+""",hdop="""+str(hdop)+""",msl="""+str(msl)+""",geoid="""+str(geoid)+""",geom=GeomFromText('POINT("""+str(lonn)+""" """+str(latt)+""")',4326)"""+""" where utc='"""+utc+"""';"""
         return query
 
 

@@ -65,12 +65,6 @@ class nmea_main:
         self.dlg2=nmea_Dialog()
         self.dlg3=nmea_settDialog()
 
-
-
-
-
-
-
         QObject.connect(self.dlg.ui.pushButton,SIGNAL("clicked()"), self.dialog)
         QObject.connect(self.dlg.ui.ButOpenNmea,SIGNAL("clicked()"), self.openNmea)
         QObject.connect(self.dlg.ui.ButExit,SIGNAL("clicked()"), self.exit)
@@ -102,14 +96,11 @@ class nmea_main:
         self.fd1 = QFileDialog()
         self.fd.setNameFilter("*.nmea")
         self.fd.setFilter("*.nmea")
+
         settings=QSettings()
         dir=settings.value('/nmea2qgis/dir', 'C:\Users')
         #self.fd.setDirectory("C:\Users\Maciek\Documents\GIG\magisterka\STD Oszczak\praca_mag")
         self.fd.setDirectory(dir)
-
-
-
-
 
 
     def unload(self):
@@ -122,25 +113,16 @@ class nmea_main:
         self.dlg.show()
         result=self.dlg.exec_()
 
-##    def dialog(self):
-##        self.filename = self.fd.getOpenFileName()
-##        from os.path import isfile
-##        if isfile(self.filename):
-##            self.dlg.ui.lineEdit.setText(self.filename)
-##            settings=QSettings()
-##            settings.setValue('/nmea2qgis/dir',QVariant(self.filename))
-##            self.fd.setDirectory(os.path.dirname(str(self.filename)))
-
     def dialog(self):
-
         self.filenames = self.fd.getOpenFileNames(None,"","","ALL (*.*);;NMEA (*.nmea)")
 ##        from os.path import isfile
 ##        if isfile(self.filename):
         if len(self.filenames)<>0:
             self.dlg.ui.lineEdit.setText(self.filenames[0])
-##            settings=QSettings()
-##            settings.setValue('/nmea2qgis/dir',QVariant(self.filename))
-##            self.fd.setDirectory(os.path.dirname(str(self.filename)))
+
+            settings=QSettings()
+            settings.setValue('/nmea2qgis/dir',str(self.filenames[0]))
+            self.fd.setDirectory(os.path.dirname(str(self.filenames[0])))
 
 
     def exit(self):
@@ -156,10 +138,6 @@ class nmea_main:
     def sett(self):
         self.dlg3.show()
 
-
-
-
-
     def openNmea(self):
         nmeadoc=QTextDocument()
         nmeacur=QTextCursor(nmeadoc)
@@ -173,6 +151,7 @@ class nmea_main:
         self.nmeaDict(open(self.dlg.ui.lineEdit.text()))
 
         self.plotmat(self.dlg2.ui.mat1Combo.currentText(),self.dlg2.ui.mat2Combo.currentText())
+
         self.whereSet()
         self.populateSql()
         self.dlg2.show()
@@ -181,38 +160,14 @@ class nmea_main:
 
 
     def addLayer(self):
-##        self.connectionObject=db.connect(':memory:')
-##        self.connectionObject=db.connect('C:\Users\Maciek\Documents\GIG\magisterka\programing\dbspatial114.sqlite')
-
         for filee in self.filenames:
-##            try:
-##                dictt=thtread(open(filee))
-##                tree=thtread2()
-##                QObject.connect( dictt, SIGNAL('finished()'), self.mess )
-##                QObject.connect( dictt, SIGNAL("update(QString)"), self.mess2 )
-##                QObject.connect( tree, SIGNAL('finished()'), self.mess )
-##                QObject.connect( tree, SIGNAL("update(QString)"), self.mess2 )
-##                tree.start()
-##                tree.wait()
-##                dictt.start()
-##                QCoreApplication.processEvents()
-                #dictt.wait()
                 self.nmeaDict(open(filee))
                 self.addSave(filee)
 
-
-        #self.dlg3.show()
 ##            except:
 ##                QMessageBox.information(self.iface.mainWindow(), "Info", "Cannot open nmea file   "+filee)
 
         self.dlg.close()
-
-    def mess(self):
-        QMessageBox.information(self.iface.mainWindow(),"inff","koniec watku")
-        self.dlg3.close()
-
-    def mess2(self,text):
-        QMessageBox.information(self.iface.mainWindow(),"inff",str(text))
 
 
     def addLayer2(self):
@@ -229,7 +184,7 @@ class nmea_main:
             cur=self.connectionObject.cursor()
             qu="""SELECT InitSpatialMetadata();"""
             cur.execute(qu)
-            qu="CREATE TABLE nmea(utc datetime primary key, fixstatus integer default 0, numsv integer default 0, hdop real default 0, msl real default 0, geoid real default 0, speed real default 0, datastatus integer default 0);"
+            qu="CREATE TABLE nmea(utc datetime primary key, fix integer default 0, numsv integer default 0, hdop real default 0, msl real default 0, geoid real default 0, speed real default 0, datastatus integer default 0);"
             cur.execute(qu)
             qu="""SELECT AddGeometryColumn('nmea', 'geom', 4326, 'POINT', 'XY')  """
             #cur.execute(qu)
@@ -301,54 +256,54 @@ class nmea_main:
         if self.dlg3.ui.utcCheck.isChecked():
                pr.addAttributes( [ QgsField("utc", QVariant.String)] )
 ##               att.append(self.utc)
-               fields[a]=QgsField("utc", QVariant.String)
+ ##              fields[a]=QgsField("utc", QVariant.String)
                qu+=',utc'
                a+=1
         if self.dlg3.ui.svCheck.isChecked():
                pr.addAttributes( [ QgsField("numSV", QVariant.Double)] )
 ##               att.append(self.numSV)
-               fields[a]=QgsField("numSV", QVariant.Double)
+ ##              fields[a]=QgsField("numSV", QVariant.Double)
                qu+=',numsv'
                a+=1
         if self.dlg3.ui.hdopCheck.isChecked():
                pr.addAttributes( [ QgsField("hdop", QVariant.Double)] )
 ##               att.append(self.hdop)
-               fields[a]=QgsField("hdop", QVariant.Double)
+ ##              fields[a]=QgsField("hdop", QVariant.Double)
                qu+=',hdop'
                a+=1
         if self.dlg3.ui.mslCheck.isChecked():
                pr.addAttributes( [ QgsField("msl", QVariant.Double)] )
                qu+=',msl'
 ##               att.append(self.msl)
-               fields[a]=QgsField("msl", QVariant.Double)
+##               fields[a]=QgsField("msl", QVariant.Double)
                a+=1
         if self.dlg3.ui.geoidCheck.isChecked():
                pr.addAttributes( [ QgsField("geoid", QVariant.Double)] )
 ##               att.append(self.geoid)
-               fields[a]=QgsField("geoid", QVariant.Double)
+##               fields[a]=QgsField("geoid", QVariant.Double)
                qu+=',geoid'
                a+=1
         if self.dlg3.ui.speedCheck.isChecked():
                pr.addAttributes( [ QgsField("speed", QVariant.Double)] )
 ##               att.append(self.speed)
-               fields[a]=QgsField("speed", QVariant.Double)
+##               fields[a]=QgsField("speed", QVariant.Double)
                qu+=',speed'
                a+=1
         if self.dlg3.ui.fixstatusCheck.isChecked():
-               pr.addAttributes( [ QgsField("fixstatus", QVariant.Double)] )
+               pr.addAttributes( [ QgsField("fix", QVariant.Double)] )
 ##               att.append(self.fixstatus)
-               fields[a]=QgsField("fixstatus", QVariant.Double)
+##               fields[a]=QgsField("fix", QVariant.Double)
                qu+=',fixstatus '
                a+=1
         if self.dlg3.ui.datastatusCheck.isChecked():
                pr.addAttributes( [ QgsField("datastatus", QVariant.Double)] )
 ##               att.append(self.datastatus)
-               fields[a]=QgsField("datastatus", QVariant.Double)
+##               fields[a]=QgsField("datastatus", QVariant.Double)
                qu+=',datastatus'
                a+=1
         if self.dlg3.ui.latCheck.isChecked():
                pr.addAttributes( [ QgsField("latitude", QVariant.Double)] )
-               fields[a]=QgsField("latitude", QVariant.Double)
+##               fields[a]=QgsField("latitude", QVariant.Double)
                qu+=',st_y(st_transform(geom,2180))'
                a+=1
         if self.dlg3.ui.lonCheck.isChecked():
@@ -397,7 +352,7 @@ class nmea_main:
             if uii.speedCheck2.isChecked():
                 qu=qu+""" and speed between """+str(uii.doubleSpinBox_11.value())+""" and """+str(uii.doubleSpinBox_12.value())
             if uii.fixstatusCheck2.isChecked():
-                qu=qu+""" and fixstatus between """+str(uii.spinBox_21.value())+""" and """+str(uii.spinBox_22.value())
+                qu=qu+""" and fix between """+str(uii.spinBox_21.value())+""" and """+str(uii.spinBox_22.value())
 
 
 
@@ -406,24 +361,6 @@ class nmea_main:
 
         cur.execute(qu)
         fetched=cur.fetchall()
-
-##        prolat=[]
-##        prolon=[]
-##        if self.dlg3.ui.latCheck.isChecked() or self.dlg3.ui.lonCheck.isChecked():
-##
-##            for f in fetched:
-##                crsSrc = QgsCoordinateReferenceSystem(4326)    # WGS 84
-##                crsDest = QgsCoordinateReferenceSystem(2180)  # WGS 84 / PL92
-##                xform = QgsCoordinateTransform(crsSrc, crsDest)
-##
-##                # forward transformation: src -> dest
-##                pt1 = xform.transform(QgsPoint(f[1],f[0]))
-##                #QMessageBox.information(self.iface.mainWindow(), 'info', pt1)
-##                prolat.append(pt1.x())
-##                prolon.append(pt1.y())
-
-
-
 
         fett=[]
 ##        ii=0
@@ -435,21 +372,7 @@ class nmea_main:
                 attributes.append(f[i+2])
 
             fet.setAttributes(attributes)
-
-##            if self.dlg3.ui.latCheck.isChecked():
-##                fet.addAttribute(a,QVariant(prolat[ii]))
-##
-##            if self.dlg3.ui.lonCheck.isChecked():
-##                fet.addAttribute(a+1,QVariant(prolon[ii]))
             fett.append(fet)
-##            ii+=1
-
-##        if self.dlg3.ui.saveCheck.isChecked():
-##            self.filename = self.fd.getSaveFileName()
-##            writer = QgsVectorFileWriter(self.filename, "CP1250", fields, QGis.WKBPoint, self.epsg4326, "ESRI Shapefile")
-##            for fet in fett:
-##                writer.addFeature(fet)
-##            del writer
 
         pr.addFeatures(fett)
         nmealayer.commitChanges()
@@ -779,13 +702,6 @@ class nmea_main:
         yyy1=[float(f[1]) for f in fetched]
         yyy2=[float(f[2]) for f in fetched]
 
-
-
-
-
-
-
-
         if self.dlg3.ui.qwtCheck.isChecked():
 
             try:
@@ -945,69 +861,6 @@ class nmea_main:
         self.dlg2.plot2.replot()
 
 
-
-##    def plotmat(self,data,data2):
-##        cur=self.connectionObject.cursor()
-##        qu1="""select utc,"""+data+""","""+data2+""" from nmea"""
-##        #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
-##        cur.execute(str(qu1))
-##        fetched=cur.fetchall()
-##        dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
-##        yyy1=[f[1] for f in fetched]
-##        yyy2=[f[2] for f in fetched]
-##
-##        self.dlg2.ui.matplot1.canvas.ax1.cla()
-##        self.dlg2.ui.matplot1.canvas.ax2.cla()
-##        self.dlg2.ui.matplot1.canvas.ax1.vlines(dates,0,yyy1,lw=5,rasterized=True)
-##        #self.dlg2.ui.matplot1.canvas.ax1.bar(self.dates,self.oy1)
-##        self.dlg2.ui.matplot1.canvas.ax1.xaxis_date()
-##        self.dlg2.ui.matplot1.canvas.ax2.vlines(dates,0,yyy2,lw=5,rasterized=True)
-##        #self.dlg2.ui.matplot1.canvas.ax2.bar(self.dates,self.oy1)
-##        self.dlg2.ui.matplot1.canvas.ax2.xaxis_date()
-##        self.dlg2.ui.matplot1.canvas.fig.autofmt_xdate()
-##        self.dlg2.ui.matplot1.canvas.draw()
-##
-##    def chmat1(self):
-##        cur=self.connectionObject.cursor()
-##        qu="""select utc,"""+self.dlg2.ui.mat1Combo.currentText()+""" from nmea"""
-####        QMessageBox.information(self.iface.mainWindow(), 'inff', qu)
-##        cur.execute(str(qu))
-##        fetched=cur.fetchall()
-##        dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
-##        yy=[f[1] for f in fetched]
-##
-##        self.dlg2.ui.matplot1.canvas.ax1.cla()
-##        self.dlg2.ui.matplot1.canvas.ax1.vlines(dates,0,yy,lw=5,rasterized=True)
-##        #self.dlg2.ui.matplot1.canvas.ax1.xaxis_date()
-##        self.dlg2.ui.matplot1.canvas.ax1.grid(True)
-##        self.dlg2.ui.matplot1.canvas.fig.autofmt_xdate()
-##        self.dlg2.ui.matplot1.canvas.draw()
-##
-##    def chmat2(self):
-##        cur=self.connectionObject.cursor()
-##        qu="""select utc,"""+self.dlg2.ui.mat2Combo.currentText()+""" from nmea"""
-##        cur.execute(str(qu))
-##        fetched=cur.fetchall()
-##        dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
-##        yy=[f[1] for f in fetched]
-####        if self.dlg2.ui.mat2Combo.currentText()=="datastatus":
-####            QMessageBox.information(self.iface.mainWindow(), 'info', "datastatus")
-####            zz=[]
-####            for stauts in yy:
-####                if stauts=="A": zz.append(1)
-####                else:   zz.append(0)
-####            yy=zz
-##        self.dlg2.ui.matplot1.canvas.ax2.cla()
-##        self.dlg2.ui.matplot1.canvas.ax2.vlines(dates,0,yy,lw=5,rasterized=True)
-##        #self.dlg2.ui.matplot1.canvas.ax2.xaxis_date()
-##        self.dlg2.ui.matplot1.canvas.ax2.grid(True)
-##        self.dlg2.ui.matplot1.canvas.fig.autofmt_xdate()
-##        self.dlg2.ui.matplot1.canvas.draw()
-
-
-
-
-
     def ggaOnly(self,ind):
 
         nmeadocc=QTextDocument()
@@ -1024,89 +877,6 @@ class nmea_main:
 
         self.dlg2.ui.nmeaBrowser.setDocument(nmeadocc)
 
-
-
-class thtread(QThread):
-    def __init__(self,filee):
-        QThread.__init__(self)
-
-        self.nmeafile=filee
-##        self.connectionObjectt=cconnectionObject
-
-    def __del__(self):
-        self.wait()
-
-    def run(self):
-
-        self.connectionObject=db.connect('C:\Users\Maciek\Documents\GIG\magisterka\programing\dbspatial114.sqlite')
-        nmeafile=self.nmeafile
-##            nmeafile=open(self.dlg.ui.lineEdit.text())
-##        try:
-##            self.connectionObject=db.connect('C:\Users\Maciek\Documents\GIG\magisterka\programing\dbspatial114.sqlite')
-
-##        self.connectionObject=self.connectionObjectt
-        #QMessageBox.critical(self.iface.mainWindow(), 'info', 'connected to database')
-
-        cur=self.connectionObject.cursor()
-
-
-
-        qu="""SELECT InitSpatialMetadata();"""
-        cur.execute(qu)
-        qu="CREATE TABLE nmea(utc datetime primary key, fixstatus integer default 0, numsv integer default 0, hdop real default 0, msl real default 0, geoid real default 0, speed real default 0, datastatus integer default 0);"
-        cur.execute(qu)
-        qu="""SELECT AddGeometryColumn('nmea', 'geom', 4326, 'POINT', 'XY')  """
-##
-##
-
-        cur.execute(qu)
-        self.connectionObject.commit()
-
-        for line in nmeafile:
-            linee=line.split(',')
-            if line[3:6]=='GGA' or line[3:6]=='RMC':
-                cur=self.connectionObject.cursor()
-                key=linee[1][:2]+':'+linee[1][2:4]+':'+linee[1][4:6]
-                qu="""insert or ignore into nmea(utc) values('"""+key+"""')"""
-
-                cur.execute(qu)
-            if line[3:6]=='GLL':
-                cur=self.connectionObject.cursor()
-                key=linee[5][:2]+':'+linee[5][2:4]+':'+linee[5][4:6]
-                qu="""insert or ignore into nmea(utc) values('"""+key+"""')"""
-                cur.execute(qu)
-        self.connectionObject.commit()
-
-
-
-        nmeafile.seek(0)
-        from funkcje_parse import funkcje
-        funkcje=funkcje()
-        for line in nmeafile:
-            if line[3:6]=='GGA' or line[3:6]=='RMC'or line[3:6]=='GLL':
-##                    try:
-                    parser={'GGA':funkcje.par_gga,'RMC':funkcje.par_rmc,'GLL':funkcje.par_gll}[line[3:6]]
-                    query=parser(line)
-                    #QMessageBox.information(self.iface.mainWindow(), 'info', query)
-                    cursor=self.connectionObject.cursor()
-##                        QMessageBox.critical(self.iface.mainWindow(), 'info', line)
-##                        QMessageBox.critical(self.iface.mainWindow(), 'info', query)
-                    cursor.execute(query)
-
-##                    except:
-##                        #QMessageBox.critical(self.iface.mainWindow(), 'error', line)
-##                        continue
-
-        self.connectionObject.commit()
-
-        nmeafile.close()
-        #self.terminate()
-
-        self.emit(SIGNAL('update(QString)'), "from work thread 1222222" )
-        return
-        #self.dlg.close()
-
-##        except:
 
 
 
@@ -1132,18 +902,3 @@ class DateTimeScaleDraw( Qwt.Qwt.QwtScaleDraw ):
 
 
 
-class thtread2(QThread):
-    def __init__(self):
-            QThread.__init__(self)
-
-    def __del__(self):
-            self.wait()
-
-    def run(self):
-        QCoreApplication.processEvents()
-##          for i in range(6):
-##            time.sleep(0.3) # artificial time delay
-        time.sleep(0.3)
-        self.emit(SIGNAL('update(QString)'), "from work thread " + str(1) )
-        return
-        #self.emit(SIGNAL('update(QString)'), "from work thread " )
