@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui_settings.ui'
 #
-# Created: Tue Nov 12 21:38:24 2013
-#      by: PyQt4 UI code generator 4.9.6
+# Created: Wed Nov 20 12:10:19 2013
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,21 +12,12 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    def _fromUtf8(s):
-        return s
-
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+    _fromUtf8 = lambda s: s
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
-        Dialog.resize(394, 283)
+        Dialog.resize(399, 283)
         self.verticalLayout = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label = QtGui.QLabel(Dialog)
@@ -110,7 +101,7 @@ class Ui_Dialog(object):
         self.horizontalLayout_2.addWidget(self.label_2)
         self.epsgSpin = QtGui.QSpinBox(Dialog)
         self.epsgSpin.setMaximum(9999)
-        self.epsgSpin.setProperty("value", 2180)
+        self.epsgSpin.setProperty(_fromUtf8("value"), 2180)
         self.epsgSpin.setObjectName(_fromUtf8("epsgSpin"))
         self.horizontalLayout_2.addWidget(self.epsgSpin)
         self.buttonBox = QtGui.QDialogButtonBox(Dialog)
@@ -123,9 +114,18 @@ class Ui_Dialog(object):
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.horizontalLayout_2.addWidget(self.buttonBox)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
+        self.matCheck = QtGui.QCheckBox(Dialog)
+        self.matCheck.setObjectName(_fromUtf8("matCheck"))
+        self.horizontalLayout_3.addWidget(self.matCheck)
         self.qwtCheck = QtGui.QCheckBox(Dialog)
         self.qwtCheck.setObjectName(_fromUtf8("qwtCheck"))
-        self.verticalLayout.addWidget(self.qwtCheck)
+        self.horizontalLayout_3.addWidget(self.qwtCheck)
+        self.noCheck = QtGui.QCheckBox(Dialog)
+        self.noCheck.setObjectName(_fromUtf8("noCheck"))
+        self.horizontalLayout_3.addWidget(self.noCheck)
+        self.verticalLayout.addLayout(self.horizontalLayout_3)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -135,19 +135,21 @@ class Ui_Dialog(object):
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog", None))
-        self.label.setText(_translate("Dialog", "Choose NMEA sentences to add to attribute table:", None))
-        self.hdopCheck.setText(_translate("Dialog", "hdop", None))
-        self.svCheck.setText(_translate("Dialog", "satelittes", None))
-        self.utcCheck.setText(_translate("Dialog", "utc", None))
-        self.fixstatusCheck.setText(_translate("Dialog", "fix status", None))
-        self.datastatusCheck.setText(_translate("Dialog", "datastatus", None))
-        self.lonCheck.setText(_translate("Dialog", "longitude", None))
-        self.latCheck.setText(_translate("Dialog", "latitude", None))
-        self.mslCheck.setText(_translate("Dialog", "mean sea level", None))
-        self.geoidCheck.setText(_translate("Dialog", "geoid", None))
-        self.speedCheck.setText(_translate("Dialog", "speed", None))
-        self.saveCheck.setText(_translate("Dialog", "Save on disk", None))
-        self.label_2.setText(_translate("Dialog", "EPSG code for lon/lat attributes", None))
-        self.qwtCheck.setText(_translate("Dialog", "use QWT", None))
+        Dialog.setWindowTitle(QtGui.QApplication.translate("Dialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("Dialog", "Choose NMEA sentences to add to attribute table:", None, QtGui.QApplication.UnicodeUTF8))
+        self.hdopCheck.setText(QtGui.QApplication.translate("Dialog", "hdop", None, QtGui.QApplication.UnicodeUTF8))
+        self.svCheck.setText(QtGui.QApplication.translate("Dialog", "satelittes", None, QtGui.QApplication.UnicodeUTF8))
+        self.utcCheck.setText(QtGui.QApplication.translate("Dialog", "utc", None, QtGui.QApplication.UnicodeUTF8))
+        self.fixstatusCheck.setText(QtGui.QApplication.translate("Dialog", "fix status", None, QtGui.QApplication.UnicodeUTF8))
+        self.datastatusCheck.setText(QtGui.QApplication.translate("Dialog", "datastatus", None, QtGui.QApplication.UnicodeUTF8))
+        self.lonCheck.setText(QtGui.QApplication.translate("Dialog", "longitude", None, QtGui.QApplication.UnicodeUTF8))
+        self.latCheck.setText(QtGui.QApplication.translate("Dialog", "latitude", None, QtGui.QApplication.UnicodeUTF8))
+        self.mslCheck.setText(QtGui.QApplication.translate("Dialog", "mean sea level", None, QtGui.QApplication.UnicodeUTF8))
+        self.geoidCheck.setText(QtGui.QApplication.translate("Dialog", "geoid", None, QtGui.QApplication.UnicodeUTF8))
+        self.speedCheck.setText(QtGui.QApplication.translate("Dialog", "speed", None, QtGui.QApplication.UnicodeUTF8))
+        self.saveCheck.setText(QtGui.QApplication.translate("Dialog", "Save on disk", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("Dialog", "EPSG code for lon/lat attributes", None, QtGui.QApplication.UnicodeUTF8))
+        self.matCheck.setText(QtGui.QApplication.translate("Dialog", "use matplotlib", None, QtGui.QApplication.UnicodeUTF8))
+        self.qwtCheck.setText(QtGui.QApplication.translate("Dialog", "use QWT", None, QtGui.QApplication.UnicodeUTF8))
+        self.noCheck.setText(QtGui.QApplication.translate("Dialog", "no plot", None, QtGui.QApplication.UnicodeUTF8))
 

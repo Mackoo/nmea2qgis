@@ -755,7 +755,7 @@ class nmea_main:
         #self.dlg2.plot.(Qwt.Curve(x, cos(x), Pen(Magenta,2),))
 
 
-        else:
+        elif self.dlg3.ui.matCheck.isChecked():
             try:
 ##            self.dlg2.ui.verticalLayout_4.removeWidget(self.plot1)
 ##            self.dlg2.ui.verticalLayout_4.removeWidget(self.plot2)
@@ -790,8 +790,8 @@ class nmea_main:
             self.matplot1.canvas.ax2.xaxis_date()
             self.matplot1.canvas.fig.autofmt_xdate()
             self.matplot1.canvas.draw()
-
-
+        else:
+            pass
 
 
     def chmat1(self):
@@ -818,7 +818,7 @@ class nmea_main:
             curve.attach(self.plot1)
             self.plot1.replot()
 
-        else:
+        elif self.dlg3.ui.matCheck.isChecked():
             cur=self.connectionObject.cursor()
             qu="""select utc,"""+self.dlg2.ui.mat1Combo.currentText()+""" from nmea"""
     ## QMessageBox.information(self.iface.mainWindow(), 'inff', qu)
@@ -834,32 +834,52 @@ class nmea_main:
             self.matplot1.canvas.fig.autofmt_xdate()
             self.matplot1.canvas.draw()
 
-
+        else:
+            pass
 
 
 
     def chmat2(self):
-        self.dlg2.plot2.clear()
-        cur=self.connectionObject.cursor()
-        qu1="""select utc,"""+self.dlg2.ui.mat2Combo.currentText()+""" from nmea"""
-        #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
-        cur.execute(str(qu1))
-        fetched=cur.fetchall()
-        datee=[int(f[0][0:2])*3600+int(f[0][3:5])*60+int(f[0][6:8])-3600 for f in fetched]
-        yyy1=[float(f[1]) for f in fetched]
+        if self.dlg3.ui.qwtCheck.isChecked():
+            self.plot2.clear()
+            cur=self.connectionObject.cursor()
+            qu1="""select utc,"""+self.dlg2.ui.mat2Combo.currentText()+""" from nmea"""
+            #QMessageBox.information(self.iface.mainWindow(), 'inff', qu1)
+            cur.execute(str(qu1))
+            fetched=cur.fetchall()
+            datee=[int(f[0][0:2])*3600+int(f[0][3:5])*60+int(f[0][6:8])-3600 for f in fetched]
+            yyy1=[float(f[1]) for f in fetched]
 
-        color = QColor('red')
-        curve = Qwt.QwtPlotCurve('bbbb')
-        pen = QPen(color)
-        pen.setWidth(2)
-        curve.setPen(pen)
-        curve.setData(datee, yyy1)
+            color = QColor('red')
+            curve = Qwt.QwtPlotCurve('bbbb')
+            pen = QPen(color)
+            pen.setWidth(2)
+            curve.setPen(pen)
+            curve.setData(datee, yyy1)
 
-##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
+    ##        curve.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,QBrush(color),QPen(color),QSize(5, 5)))
 
-        curve.attach(self.dlg2.plot2)
-        self.dlg2.plot2.replot()
+            curve.attach(self.plot2)
+            self.plot2.replot()
 
+        elif self.dlg3.ui.matCheck.isChecked():
+            cur=self.connectionObject.cursor()
+            qu="""select utc,"""+self.dlg2.ui.mat2Combo.currentText()+""" from nmea"""
+    ## QMessageBox.information(self.iface.mainWindow(), 'inff', qu)
+            cur.execute(str(qu))
+            fetched=cur.fetchall()
+            dates=[datetime.datetime.strptime(f[0],'%H:%M:%S') for f in fetched]
+            yy=[f[1] for f in fetched]
+
+            self.matplot1.canvas.ax2.cla()
+            self.matplot1.canvas.ax2.vlines(dates,0,yy,lw=5,rasterized=True)
+            self.matplot1.canvas.ax2.xaxis_date()
+            self.matplot1.canvas.ax2.grid(True)
+            self.matplot1.canvas.fig.autofmt_xdate()
+            self.matplot1.canvas.draw()
+
+        else:
+            pass
 
     def ggaOnly(self,ind):
 

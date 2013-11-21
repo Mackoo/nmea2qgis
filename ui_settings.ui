@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>394</width>
+    <width>399</width>
     <height>283</height>
    </rect>
   </property>
@@ -188,11 +188,29 @@
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="qwtCheck">
-     <property name="text">
-      <string>use QWT</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QCheckBox" name="matCheck">
+       <property name="text">
+        <string>use matplotlib</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="qwtCheck">
+       <property name="text">
+        <string>use QWT</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="noCheck">
+       <property name="text">
+        <string>no plot</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout"/>
